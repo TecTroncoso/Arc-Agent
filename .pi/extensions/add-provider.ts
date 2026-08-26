@@ -102,6 +102,41 @@ export function saveModelsJson(path: string, config: ModelsJson): void {
 	writeFileSync(path, `${JSON.stringify(config, null, 2)}\n`);
 }
 
+/**
+ * Keep settings.json enabledModels in sync so /model only lists providers the
+ * user explicitly added. Adds "<id>/*" when a provider is registered, removes
+ * it on removal; drops the key entirely when the list becomes empty.
+ */
+export function updateEnabledModels(agentDir: string, providerId: string, add: boolean): boolean {
+	const path = join(agentDir, "settings.json");
+	let settings: Record<string, unknown> = {};
+	if (existsSync(path)) {
+		try {
+			const parsed: unknown = JSON.parse(readFileSync(path, "utf8").replace(/^\uFEFF/, ""));
+			if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+				settings = parsed as Record<string, unknown>;
+			}
+		} catch {
+			return false;
+		}
+	}
+	const glob = `${providerId}/*`;
+	const current = Array.isArray(settings.enabledModels)
+		? (settings.enabledModels as unknown[]).filter((entry): entry is string => typeof entry === "string")
+		: [];
+	if (add) {
+		if (!current.includes(glob)) current.push(glob);
+	} else {
+		const index = current.indexOf(glob);
+		if (index >= 0) current.splice(index, 1);
+	}
+	if (current.length === 0) delete settings.enabledModels;
+	else settings.enabledModels = current;
+	writeFileSync(path, `${JSON.stringify(settings, null, 2)}\n`);
+	return true;
+}
+
+
 export function buildProviderConfig(
 	baseUrl: string,
 	apiKey: string,
@@ -225,6 +260,11 @@ export default function addProviderExtension(pi: ExtensionAPI): void {
 			// Register immediately so /model picks it up without a restart.
 			pi.registerProvider(providerId, providerConfig);
 
+			// Scope /model to explicitly added providers only.
+			if (!updateEnabledModels(getAgentDir(), providerId, true)) {
+				ctx.ui.notify(`Could not update enabledModels in settings.json; add "${providerId}/*" manually.`, "warning");
+			}
+
 			ctx.ui.notify(
 				`Added ${providerId} (${modelIds.length} model${modelIds.length === 1 ? "" : "s"}) at ${baseUrl}. Select it with /model.`,
 			);
@@ -262,6 +302,7 @@ export default function addProviderExtension(pi: ExtensionAPI): void {
 			delete config.providers?.[picked];
 			saveModelsJson(path, config);
 			pi.unregisterProvider(picked);
+			updateEnabledModels(getAgentDir(), picked, false);
 			ctx.ui.notify(`Removed ${picked} from models.json.`);
 		},
 	});
