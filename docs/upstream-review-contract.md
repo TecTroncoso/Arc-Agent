@@ -1,3 +1,21 @@
+﻿# Upstream Review Contract (reference)
+
+This document is preserved for reference only. It is the architectural
+contract that the upstream review binary used to coordinate with Pi in
+the `gentle-pi` package. Arc Agent does not ship that binary, so this
+contract is not enforceable here.
+
+It is kept in `docs/` (not `.pi/skills/`) because the runtime skills
+that depend on it — `judgment-day` and `rdd-defect-workflow` — already
+self-limit to "review-only, no delivery authority" and operate as plain
+prompt flows without this document. Loading it as a skill would only
+add noise to the model context.
+
+If a future review binary is added to Arc Agent, this contract becomes
+the integration spec and the file should move back into `.pi/skills/_shared/`.
+
+---
+
 # Compact Causal Review Contract
 
 The local orchestrator and same-user process are trusted to execute selected actors and submit their exact outputs. Reviewer and validator outputs remain semantically untrusted inputs: native code owns scope, risk, IDs, canonicalization, ordinary state, and legal lifecycle transitions, and rejects malformed or causally inconsistent results. The Git common-directory authority is the only authorization source; summaries and prose ledgers are untrusted data. Legacy Pi mirror and bundle transport is retired.
@@ -51,7 +69,7 @@ Before editing, `finalize` requires a positive correction-line forecast. A forec
 
 Initial lenses never rerun. The correction preserves frozen findings and genesis scope: the original candidate tree, paths, untracked set, and correction IDs. It cannot add scope.
 
-The targeted validator runs through the provider-rendered self-contained `review.capture-validation` vector — Go materializes its prompt, runs its own locked-down `pi` process, and admits the raw verdict — and checks only the original criteria and one correction regression for the exact correction IDs. It cannot add findings, request another correction, launch actors, persist authority, or request another attempt. Failure escalates. Later observations are inert follow-ups.
+The targeted validator runs through the provider-rendered self-contained `review.capture-validation` vector â€” Go materializes its prompt, runs its own locked-down `pi` process, and admits the raw verdict â€” and checks only the original criteria and one correction regression for the exact correction IDs. It cannot add findings, request another correction, launch actors, persist authority, or request another attempt. Failure escalates. Later observations are inert follow-ups.
 
 Final verification evidence is supplied and hashed only during finalization. Failure escalates and never reopens review.
 
@@ -80,3 +98,4 @@ Judgment Day alone may iterate discovery and scoped re-judgment, for at most two
 Findings surviving round two escalate; no third-round transition exists.
 
 Judgment Day stays mutable on graph-v1. Its reducer, replay, object-store, lock, snapshot, and graph receipt-validation dependencies remain live even though ordinary authority is native.
+

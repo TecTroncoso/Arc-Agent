@@ -15,8 +15,6 @@ Judgment Day is a standalone developer tool: judges run whenever asked, on any r
 
 Judgment Day starts only when explicitly requested. It does not start, configure, or consume ordinary review for that lineage.
 
-Historical compatibility note (obsolete): Judgment Day starts only when explicitly requested and replaces ordinary review for that lineage. Current behavior is the independent lifecycle above.
-
 ## Transaction Rules
 
 Judgment Day starts with exactly two blind judges and zero refuters.
