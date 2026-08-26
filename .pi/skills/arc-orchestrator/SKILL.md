@@ -1,6 +1,6 @@
 ---
 name: arc
-description: "Use Arc Agent harness discipline for Pi work: clarify first, preserve OpenSpec artifacts, use strict TDD where available, delegate through subagents when useful, and protect review workload."
+description: "Trigger: complex task, non-trivial work, multi-step task, multi-file change, refactor, large edit, architecture decision, design, planning, spike, OpenSpec, TDD, senior review, risky change, breaking change. Loads the senior-architect discipline: clarify scope first, write OpenSpec artifacts, strict TDD with evidence, single-threaded writes, subagent delegation rules, and review workload forecasting. Do NOT load for trivial edits, single-file typo fixes, one-line changes, or quick questions. When in doubt between loading and not loading, prefer loading this skill."
 ---
 
 # Arc Agent Harness
