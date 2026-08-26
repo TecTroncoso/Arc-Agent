@@ -51,6 +51,23 @@ npm run check                 # Lint, format, and type check
 ./pi-test.sh                  # Run the CLI from sources on Unix
 ```
 
+## Skills
+
+The repository ships a curated set of reusable skills under `.pi/skills/`. Skills auto-load when their trigger description matches the user's request, and all are renamed to Arc Agent branding.
+
+* **`arc-orchestrator`** — senior-architect discipline for non-trivial work. Auto-loads on complex tasks, refactors, architecture decisions, multi-file changes, OpenSpec, TDD, and risky changes; skips trivial edits.
+* **`branch-pr`** / **`chained-pr`** — open, link, and chain pull requests across dependent branches.
+* **`cognitive-doc-design`** — design documents that match how the model reasons about code.
+* **`comment-writer`** — write code review comments in a consistent house style.
+* **`issue-creation`** — file issues with enough context to be actionable.
+* **`release`** — orchestrate a release: changelog, version bump, tag, publish.
+* **`work-unit-commits`** — break a change into a series of logically-named commits.
+* **`skill-creator`** / **`skill-improver`** / **`skill-registry`** — create, refine, and list skills.
+* **`judgment-day`** — multi-perspective review of a focused change. Falls back to a single self-review pass when the external review binary is not installed; explicitly notes when that happens.
+* **`rdd-defect-workflow`** — discover, fix, and re-verify a defect through the review pipeline. Collapses to a single discover+fix pass without the external review binary.
+
+A reusable prompt at `.pi/prompts/skill-creation.md` is available for guided skill authoring. The shared review contract used by the review-related skills lives in [`docs/upstream-review-contract.md`](docs/upstream-review-contract.md).
+
 ## Building standalone binaries
 
 The release pipeline produces a standalone Bun-based executable and the npm package from a single source archive. Use `npm run release:local -- --out <dir>` to produce a non-published local build, or trigger `.github/workflows/build-binaries.yml` by pushing a `v*` tag.
