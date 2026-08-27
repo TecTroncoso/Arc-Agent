@@ -1,0 +1,92 @@
+strict_tdd: true
+context: |
+  pi-monorepo is a Node.js/TypeScript ESM, Node.js/TypeScript, Pi extension package, Python project.
+  Detected markers: package.json, tsconfig.json, npm package manager, packages\agent/package.json, packages\agent/npm package manager, packages\ai/package.json, packages\ai/npm package manager, packages\client/package.json, packages\client/npm package manager, packages\coding-agent/package.json, packages\coding-agent/npm package manager, packages\coding-agent\examples\extensions\custom-provider-anthropic/package.json, packages\coding-agent\examples\extensions\custom-provider-anthropic/npm package manager, packages\coding-agent\examples\extensions\custom-provider-gitlab-duo/package.json, packages\coding-agent\examples\extensions\custom-provider-gitlab-duo/npm package manager, packages\coding-agent\examples\extensions\gondolin/package.json, packages\coding-agent\examples\extensions\gondolin/npm package manager, packages\coding-agent\examples\extensions\sandbox/package.json, packages\coding-agent\examples\extensions\sandbox/npm package manager, packages\coding-agent\examples\extensions\with-deps/package.json, packages\coding-agent\examples\extensions\with-deps/npm package manager, packages\coding-agent\install-lock/package.json, packages\coding-agent\install-lock/npm package manager, packages\evals/package.json, packages\evals/tsconfig.json, packages\evals/npm package manager, packages\protocol/package.json, packages\protocol/npm package manager, packages\server/package.json, packages\server/npm package manager, packages\session-backends\sqlite-node/package.json, packages\session-backends\sqlite-node/npm package manager, packages\telemetry/package.json, packages\telemetry/npm package manager, packages\tui/package.json, packages\tui/npm package manager, GitHub Actions.
+  Package managers: npm.
+  Additional evidence: Test-like files detected (484); examples: .pi\extensions\arc-agents\agents\sdd-spec.md, packages\agent\test\agent-loop.test.ts, packages\agent\test\agent.test.ts, packages\agent\test\e2e.test.ts, packages\agent\test\harness\agent-harness-scaffold.test.ts.
+  Primary test command: npm test.
+  Unit tests: package script (npm test); Vitest (cd packages\agent && npm test); Vitest (cd packages\ai && npm test); Vitest (cd packages\client && npm test); Vitest (cd packages\coding-agent && npm test); Vitest (cd packages\evals && npm test); Vitest (cd packages\protocol && npm test); Vitest (cd packages\server && npm test); Vitest (cd packages\session-backends\sqlite-node && npm test); Vitest (cd packages\telemetry && npm test); package script (cd packages\tui && npm test).
+  Integration tests: none.
+  E2E tests: none.
+rules:
+  proposal:
+    require_problem_statement: true
+  spec:
+    require_acceptance_criteria: true
+  design:
+    require_tradeoffs: true
+  tasks:
+    protect_review_workload: true
+  apply:
+    test_command: "npm test"
+  verify:
+    test_command: "npm test"
+testing:
+  detected: "2026-08-27"
+  runner:
+    command: "npm test"
+    framework: "package script"
+  layers:
+    unit: "package script, Vitest, Vitest, Vitest, Vitest, Vitest, Vitest, Vitest, Vitest, Vitest, package script"
+    integration: ""
+    e2e: ""
+  commands:
+    unit:
+      - scope: "."
+        command: "npm test"
+        framework: "package script"
+      - scope: "packages\\agent"
+        command: "cd packages\\agent && npm test"
+        framework: "Vitest"
+      - scope: "packages\\ai"
+        command: "cd packages\\ai && npm test"
+        framework: "Vitest"
+      - scope: "packages\\client"
+        command: "cd packages\\client && npm test"
+        framework: "Vitest"
+      - scope: "packages\\coding-agent"
+        command: "cd packages\\coding-agent && npm test"
+        framework: "Vitest"
+      - scope: "packages\\evals"
+        command: "cd packages\\evals && npm test"
+        framework: "Vitest"
+      - scope: "packages\\protocol"
+        command: "cd packages\\protocol && npm test"
+        framework: "Vitest"
+      - scope: "packages\\server"
+        command: "cd packages\\server && npm test"
+        framework: "Vitest"
+      - scope: "packages\\session-backends\\sqlite-node"
+        command: "cd packages\\session-backends\\sqlite-node && npm test"
+        framework: "Vitest"
+      - scope: "packages\\telemetry"
+        command: "cd packages\\telemetry && npm test"
+        framework: "Vitest"
+      - scope: "packages\\tui"
+        command: "cd packages\\tui && npm test"
+        framework: "package script"
+    integration:
+      []
+    e2e:
+      []
+  coverage:
+    command: "cd packages\\session-backends\\sqlite-node && npm run coverage"
+    commands:
+      - scope: "packages\\session-backends\\sqlite-node"
+        command: "cd packages\\session-backends\\sqlite-node && npm run coverage"
+        framework: "coverage"
+quality:
+  lint: ""
+  lint_commands:
+    []
+  typecheck: "cd packages\\client && npm run typecheck"
+  typecheck_commands:
+    - scope: "packages\\client"
+      command: "cd packages\\client && npm run typecheck"
+      framework: "type checker"
+    - scope: "packages\\server"
+      command: "cd packages\\server && npm run typecheck"
+      framework: "type checker"
+  format: ""
+  format_commands:
+    []

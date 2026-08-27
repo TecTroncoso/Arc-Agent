@@ -48,3 +48,4 @@ abrir_proyecto.bat
 
 # Local Arc Agent runtime state
 .arc/
+.pi/arc-ai/
