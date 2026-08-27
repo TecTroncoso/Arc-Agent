@@ -9,7 +9,7 @@ import type { SddArtifactStore } from "./sdd-status.ts";
 export type { SddArtifactStore };
 
 const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
-const ASSETS_DIR = join(PACKAGE_ROOT, "assets");
+const ASSETS_DIR = join(PACKAGE_ROOT, "arc-agents");
 const MANAGED_ASSETS_MANIFEST = "managed-assets.json";
 const MANAGED_ASSETS_SCHEMA_VERSION = 1;
 const LEGACY_MANAGED_ASSET_MANIFESTS = Object.freeze([
