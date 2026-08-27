@@ -13,6 +13,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
+import type { Model } from "@earendil-works/pi-ai";
 import { getAgentDir } from "@earendil-works/pi-coding-agent";
 import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 
@@ -134,6 +135,27 @@ export function updateEnabledModels(agentDir: string, providerId: string, add: b
 	else settings.enabledModels = current;
 	writeFileSync(path, `${JSON.stringify(settings, null, 2)}\n`);
 	return true;
+}
+
+/**
+ * Read the `enabledModels` list from settings.json. Returns the list when
+ * present and well-formed, otherwise undefined (so the caller can fall back to
+ * "no filter" semantics).
+ */
+export function readEnabledModels(agentDir: string): string[] | undefined {
+	const path = join(agentDir, "settings.json");
+	if (!existsSync(path)) return undefined;
+	let settings: Record<string, unknown> = {};
+	try {
+		const parsed: unknown = JSON.parse(readFileSync(path, "utf8").replace(/^\uFEFF/, ""));
+		if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+			settings = parsed as Record<string, unknown>;
+		}
+	} catch {
+		return undefined;
+	}
+	if (!Array.isArray(settings.enabledModels)) return undefined;
+	return (settings.enabledModels as unknown[]).filter((entry): entry is string => typeof entry === "string");
 }
 
 
@@ -263,10 +285,34 @@ export default function addProviderExtension(pi: ExtensionAPI): void {
 			// Scope /model to explicitly added providers only.
 			if (!updateEnabledModels(getAgentDir(), providerId, true)) {
 				ctx.ui.notify(`Could not update enabledModels in settings.json; add "${providerId}/*" manually.`, "warning");
+			} else {
+				// Refresh the runtime's view of enabledModels so the new glob takes
+				// effect without a session reload. Older pi versions without these
+				// setters keep the old on-disk-only behaviour.
+				if (typeof ctx.setEnabledModels === "function") {
+					const current = ctx.scopedModels;
+					const snapshot = readEnabledModels(getAgentDir());
+					if (snapshot && !snapshot.includes(`${providerId}/*`)) {
+						ctx.setEnabledModels([...snapshot, `${providerId}/*`]);
+					}
+					// setScopedModels so /scoped-models and Ctrl+P cycling pick up the
+					// new provider's models right away.
+					if (typeof ctx.setScopedModels === "function") {
+						const newModels = modelIds
+							.map((id) => ctx.modelRegistry.getModel(providerId, id))
+							.filter((m): m is Model<any> => m !== undefined)
+							.map((model) => ({ model }));
+						const known = new Set(current.map((s) => `${s.model.provider}/${s.model.id}`));
+						const additions = newModels.filter((s) => !known.has(`${s.model.provider}/${s.model.id}`));
+						if (additions.length > 0) {
+							ctx.setScopedModels([...current, ...additions]);
+						}
+					}
+				}
 			}
 
 			ctx.ui.notify(
-				`Added ${providerId} (${modelIds.length} model${modelIds.length === 1 ? "" : "s"}) at ${baseUrl}. Select it with /model.`,
+				`Added ${providerId} (${modelIds.length} model${modelIds.length === 1 ? "" : "s"}) at ${baseUrl}. Available now in /model and /scoped-models.`,
 			);
 		},
 	});
@@ -303,6 +349,19 @@ export default function addProviderExtension(pi: ExtensionAPI): void {
 			saveModelsJson(path, config);
 			pi.unregisterProvider(picked);
 			updateEnabledModels(getAgentDir(), picked, false);
+			// Refresh the runtime in vivo so the change is visible without a
+			// session reload. Falls through silently on older pi versions.
+			if (typeof ctx.setEnabledModels === "function") {
+				const snapshot = readEnabledModels(getAgentDir()) ?? [];
+				const filtered = snapshot.filter((pattern) => pattern !== `${picked}/*`);
+				ctx.setEnabledModels(filtered.length === 0 ? undefined : filtered);
+			}
+			if (typeof ctx.setScopedModels === "function") {
+				const remaining = ctx.scopedModels.filter(
+					(s) => s.model.provider !== picked,
+				);
+				ctx.setScopedModels(remaining.length === 0 ? undefined : remaining);
+			}
 			ctx.ui.notify(`Removed ${picked} from models.json.`);
 		},
 	});

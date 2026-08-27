@@ -2079,6 +2079,12 @@ export class InteractiveMode {
 			modelRegistry: extensionRunner.getModelRegistry(),
 			model: this.session.model,
 			scopedModels: this.session.scopedModels,
+			setScopedModels: (models) => {
+				this.session.setScopedModels(models ? [...models] : []);
+			},
+			setEnabledModels: (patterns) => {
+				this.settingsManager.setEnabledModels(patterns ? [...patterns] : undefined);
+			},
 			thinkingLevel: this.session.thinkingLevel,
 			isIdle: () => this.session.isIdle,
 			isProjectTrusted: () => this.settingsManager.isProjectTrusted(),

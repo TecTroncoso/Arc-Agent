@@ -100,6 +100,8 @@ describe("ExtensionRunner", () => {
 		compact: () => {},
 		getSystemPrompt: () => "",
 		getScopedModels: () => [],
+		setScopedModels: () => {},
+		setEnabledModels: () => {},
 	};
 
 	describe("scopedModels", () => {
@@ -115,6 +117,41 @@ describe("ExtensionRunner", () => {
 			const scoped = [{ model: { id: "scoped-test" }, thinkingLevel: "high" }] as unknown as ScopedModel[];
 			runner.bindCore(extensionActions, { ...extensionContextActions, getScopedModels: () => scoped });
 			expect(runner.createContext().scopedModels).toBe(scoped);
+		});
+
+		it("forwards setScopedModels from the context to the bound action", async () => {
+			const setScopedModels = vi.fn();
+			const result = await discoverAndLoadExtensions([], tempDir, tempDir);
+			const runner = new ExtensionRunner(
+				result.extensions,
+				result.runtime,
+				tempDir,
+				sessionManager,
+				modelRegistry,
+			);
+			runner.bindCore(extensionActions, { ...extensionContextActions, setScopedModels });
+			const ctx = runner.createContext();
+			const next = [{ model: { id: "new-scope" } }] as unknown as ScopedModel[];
+			ctx.setScopedModels(next);
+			expect(setScopedModels).toHaveBeenCalledWith(next);
+		});
+
+		it("forwards setEnabledModels from the context to the bound action", async () => {
+			const setEnabledModels = vi.fn();
+			const result = await discoverAndLoadExtensions([], tempDir, tempDir);
+			const runner = new ExtensionRunner(
+				result.extensions,
+				result.runtime,
+				tempDir,
+				sessionManager,
+				modelRegistry,
+			);
+			runner.bindCore(extensionActions, { ...extensionContextActions, setEnabledModels });
+			const ctx = runner.createContext();
+			ctx.setEnabledModels(["anthropic/*", "openai/*"]);
+			expect(setEnabledModels).toHaveBeenCalledWith(["anthropic/*", "openai/*"]);
+			ctx.setEnabledModels(undefined);
+			expect(setEnabledModels).toHaveBeenLastCalledWith(undefined);
 		});
 	});
 

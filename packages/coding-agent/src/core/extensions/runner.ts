@@ -276,6 +276,8 @@ export class ExtensionRunner {
 	private errorListeners: Set<ExtensionErrorListener> = new Set();
 	private getModel: () => Model<any> | undefined = () => undefined;
 	private getScopedModels: () => readonly ScopedModel[] = () => [];
+	private setScopedModelsFn: (models: readonly ScopedModel[] | undefined) => void = () => {};
+	private setEnabledModelsFn: (patterns: readonly string[] | undefined) => void = () => {};
 	private isIdleFn: () => boolean = () => true;
 	private isProjectTrustedFn: () => boolean = () => true;
 	private getSignalFn: () => AbortSignal | undefined = () => undefined;
@@ -339,6 +341,8 @@ export class ExtensionRunner {
 		// Context actions (required)
 		this.getModel = contextActions.getModel;
 		this.getScopedModels = contextActions.getScopedModels;
+		this.setScopedModelsFn = contextActions.setScopedModels;
+		this.setEnabledModelsFn = contextActions.setEnabledModels;
 		this.isIdleFn = contextActions.isIdle;
 		this.isProjectTrustedFn = contextActions.isProjectTrusted;
 		this.getSignalFn = contextActions.getSignal;
@@ -706,6 +710,14 @@ export class ExtensionRunner {
 			get scopedModels() {
 				runner.assertActive();
 				return getScopedModels();
+			},
+			setScopedModels: (models) => {
+				runner.assertActive();
+				runner.setScopedModelsFn(models);
+			},
+			setEnabledModels: (patterns) => {
+				runner.assertActive();
+				runner.setEnabledModelsFn(patterns);
 			},
 			get thinkingLevel() {
 				runner.assertActive();

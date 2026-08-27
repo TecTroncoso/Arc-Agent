@@ -326,6 +326,26 @@ export interface ExtensionContext {
 	 *  the `/scoped-models` command shows. Empty when no scoping is
 	 *  configured (all available models are usable). Read-only snapshot. */
 	scopedModels: readonly ScopedModel[];
+	/**
+	 * Replace the scoped-models set for the current session.
+	 *
+	 * Use this from extensions that mutate the model catalogue at runtime
+	 * (for example, after `pi.registerProvider()` adds a new provider) so the
+	 * scope stays in sync without requiring a session reload.
+	 *
+	 * Pass `undefined` to clear the scope and let every available model be
+	 * usable again.
+	 */
+	setScopedModels(models: readonly ScopedModel[] | undefined): void;
+	/**
+	 * Persist the `enabledModels` patterns to `settings.json` and refresh the
+	 * in-memory cache so subsequent reads of `getEnabledModels()` reflect the
+	 * change.
+	 *
+	 * Pass `undefined` to clear the filter and make every available model
+	 * usable again.
+	 */
+	setEnabledModels(patterns: readonly string[] | undefined): void;
 	/** Current thinking level, when provided by the session runtime. */
 	thinkingLevel?: ThinkingLevel;
 	/** Whether the agent is idle (not streaming) */
@@ -1689,6 +1709,26 @@ export interface ExtensionActions {
 export interface ExtensionContextActions {
 	getModel: () => Model<any> | undefined;
 	getScopedModels: () => readonly ScopedModel[];
+	/**
+	 * Replace the scoped-models set for the current session.
+	 *
+	 * Use this from extensions that mutate the model catalogue at runtime
+	 * (for example, after `pi.registerProvider()` adds a new provider) so the
+	 * scope stays in sync without requiring a session reload.
+	 *
+	 * Pass `undefined` to clear the scope and let every available model be
+	 * usable again.
+	 */
+	setScopedModels: (models: readonly ScopedModel[] | undefined) => void;
+	/**
+	 * Persist the `enabledModels` patterns to `settings.json` and refresh the
+	 * in-memory cache so subsequent reads of `getEnabledModels()` reflect the
+	 * change.
+	 *
+	 * Pass `undefined` to clear the filter and make every available model
+	 * usable again.
+	 */
+	setEnabledModels: (patterns: readonly string[] | undefined) => void;
 	isIdle: () => boolean;
 	isProjectTrusted: () => boolean;
 	getSignal: () => AbortSignal | undefined;

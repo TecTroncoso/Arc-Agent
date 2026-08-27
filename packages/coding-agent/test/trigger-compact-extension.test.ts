@@ -12,6 +12,8 @@ function createContext(tokens: number | null, compact = vi.fn()): ExtensionConte
 		modelRegistry: {} as ExtensionContext["modelRegistry"],
 		model: undefined,
 		scopedModels: [],
+		setScopedModels: vi.fn(),
+		setEnabledModels: vi.fn(),
 		isIdle: () => true,
 		isProjectTrusted: () => true,
 		signal: undefined,
