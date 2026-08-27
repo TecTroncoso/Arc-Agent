@@ -1,6 +1,6 @@
 import type { Model } from "@earendil-works/pi-ai";
 import { describe, expect, it } from "vitest";
-import { maxThinkingLevelLabel } from "../src/modes/interactive/components/thinking-level-format.ts";
+import { formatTokenCount, maxThinkingLevelLabel } from "../src/modes/interactive/components/model-format.ts";
 
 function fakeModel(reasoning: boolean, thinkingLevelMap?: Record<string, unknown>): Model<any> {
 	return {
@@ -54,5 +54,27 @@ describe("maxThinkingLevelLabel", () => {
 
 	it("returns max when max is present, even alongside xhigh", () => {
 		expect(maxThinkingLevelLabel(fakeModel(true, { off: null, xhigh: "xhigh", max: "max" }))).toBe("max");
+	});
+});
+
+describe("formatTokenCount", () => {
+	it("formats round thousands with a K suffix", () => {
+		expect(formatTokenCount(200000)).toBe("200K");
+		expect(formatTokenCount(128000)).toBe("128K");
+	});
+
+	it("keeps one decimal for non-round thousands", () => {
+		expect(formatTokenCount(131072)).toBe("131.1K");
+		expect(formatTokenCount(8192)).toBe("8.2K");
+	});
+
+	it("formats millions with an M suffix", () => {
+		expect(formatTokenCount(1000000)).toBe("1M");
+		expect(formatTokenCount(1048576)).toBe("1.0M");
+	});
+
+	it("returns small values unchanged", () => {
+		expect(formatTokenCount(999)).toBe("999");
+		expect(formatTokenCount(0)).toBe("0");
 	});
 });

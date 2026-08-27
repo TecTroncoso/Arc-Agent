@@ -16,7 +16,7 @@ import { getModelSelectorSearchText } from "../model-search.ts";
 import { theme } from "../theme/theme.ts";
 import { DynamicBorder } from "./dynamic-border.ts";
 import { keyHint } from "./keybinding-hints.ts";
-import { maxThinkingLevelLabel } from "./thinking-level-format.ts";
+import { formatTokenCount, maxThinkingLevelLabel } from "./model-format.ts";
 
 interface ModelItem {
 	provider: string;
@@ -317,22 +317,23 @@ export class ModelSelectorComponent extends Container implements Focusable {
 			const isDefault = this.isDefaultModel(item.model);
 			const defaultBadge = isDefault ? theme.fg("muted", " · default") : "";
 
+			const thinkingLabel = maxThinkingLevelLabel(item.model);
+			const infoParts = [
+				item.model.contextWindow > 0 ? `ctx: ${formatTokenCount(item.model.contextWindow)}` : "",
+				thinkingLabel ? `thinking: ${thinkingLabel}` : "",
+			].filter(Boolean);
+			const infoBadge = infoParts.length > 0 ? theme.fg("muted", ` (${infoParts.join(", ")})`) : "";
+			const checkmark = isCurrent ? theme.fg("success", " ✓") : "";
 			let line = "";
 			if (isSelected) {
 				const prefix = theme.fg("accent", "→ ");
-				const modelText = `${item.id}`;
+				const modelText = theme.fg("accent", `${item.id}`);
 				const providerBadge = theme.fg("muted", `[${item.provider}]`);
-				const thinkingLabel = maxThinkingLevelLabel(item.model);
-				const thinkingBadge = thinkingLabel ? theme.fg("muted", ` (thinking: ${thinkingLabel})`) : "";
-				const checkmark = isCurrent ? theme.fg("success", " ✓") : "";
-				line = `${prefix + theme.fg("accent", modelText)} ${providerBadge}${thinkingBadge}${defaultBadge}${checkmark}`;
+				line = `${prefix}${modelText} ${providerBadge}${infoBadge}${defaultBadge}${checkmark}`;
 			} else {
 				const modelText = `  ${item.id}`;
 				const providerBadge = theme.fg("muted", `[${item.provider}]`);
-				const thinkingLabel = maxThinkingLevelLabel(item.model);
-				const thinkingBadge = thinkingLabel ? theme.fg("muted", ` (thinking: ${thinkingLabel})`) : "";
-				const checkmark = isCurrent ? theme.fg("success", " ✓") : "";
-				line = `${modelText} ${providerBadge}${thinkingBadge}${defaultBadge}${checkmark}`;
+				line = `${modelText} ${providerBadge}${infoBadge}${defaultBadge}${checkmark}`;
 			}
 
 			this.listContainer.addChild(new Text(line, 0, 0));
@@ -355,8 +356,14 @@ export class ModelSelectorComponent extends Container implements Focusable {
 			this.listContainer.addChild(new Text(theme.fg("muted", "  No matching models"), 0, 0));
 		} else {
 			const selected = this.filteredModels[this.selectedIndex];
+			const details: string[] = [];
+			if (selected.model.contextWindow > 0) details.push(`ctx: ${formatTokenCount(selected.model.contextWindow)}`);
+			if (selected.model.maxTokens > 0) details.push(`out: ${formatTokenCount(selected.model.maxTokens)}`);
+			const detailSuffix = details.length > 0 ? ` (${details.join(", ")})` : "";
 			this.listContainer.addChild(new Spacer(1));
-			this.listContainer.addChild(new Text(theme.fg("muted", `  Model Name: ${selected.model.name}`), 0, 0));
+			this.listContainer.addChild(
+				new Text(theme.fg("muted", `  Model Name: ${selected.model.name}${detailSuffix}`), 0, 0),
+			);
 		}
 		if (this.refreshStatusMessage) {
 			this.listContainer.addChild(new Spacer(1));

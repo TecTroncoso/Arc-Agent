@@ -14,7 +14,7 @@ import { getModelSearchText } from "../model-search.ts";
 import { theme } from "../theme/theme.ts";
 import { DynamicBorder } from "./dynamic-border.ts";
 import { keyText } from "./keybinding-hints.ts";
-import { maxThinkingLevelLabel } from "./thinking-level-format.ts";
+import { formatTokenCount, maxThinkingLevelLabel } from "./model-format.ts";
 
 // EnabledIds: null = all enabled (no filter), string[] = explicit ordered list
 type EnabledIds = string[] | null;
@@ -251,7 +251,11 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 			const modelText = isSelected ? theme.fg("accent", id) : id;
 			const providerBadge = theme.fg("muted", item.model ? ` [${item.model.provider}]` : " [unavailable]");
 			const thinkingLabel = item.model ? maxThinkingLevelLabel(item.model) : "";
-			const thinkingBadge = thinkingLabel ? theme.fg("muted", ` (thinking: ${thinkingLabel})`) : "";
+			const infoParts = [
+				item.model && item.model.contextWindow > 0 ? `ctx: ${formatTokenCount(item.model.contextWindow)}` : "",
+				thinkingLabel ? `thinking: ${thinkingLabel}` : "",
+			].filter(Boolean);
+			const infoBadge = infoParts.length > 0 ? theme.fg("muted", ` (${infoParts.join(", ")})`) : "";
 			const status = item.model
 				? allEnabled
 					? ""
@@ -259,7 +263,7 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 						? theme.fg("success", " ✓")
 						: theme.fg("dim", " ✗")
 				: theme.fg("dim", " ✗");
-			this.listContainer.addChild(new Text(`${prefix}${modelText}${providerBadge}${thinkingBadge}${status}`, 0, 0));
+			this.listContainer.addChild(new Text(`${prefix}${modelText}${providerBadge}${infoBadge}${status}`, 0, 0));
 		}
 
 		// Add scroll indicator if needed
@@ -271,14 +275,15 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 
 		if (this.filteredItems.length > 0) {
 			const selected = this.filteredItems[this.selectedIndex];
+			const details: string[] = [];
+			if (selected.model && selected.model.contextWindow > 0)
+				details.push(`ctx: ${formatTokenCount(selected.model.contextWindow)}`);
+			if (selected.model && selected.model.maxTokens > 0)
+				details.push(`out: ${formatTokenCount(selected.model.maxTokens)}`);
+			const detailSuffix = details.length > 0 ? ` (${details.join(", ")})` : "";
+			const footerLabel = selected.model ? `Model Name: ${selected.model.name}${detailSuffix}` : "Model unavailable";
 			this.listContainer.addChild(new Spacer(1));
-			this.listContainer.addChild(
-				new Text(
-					theme.fg("muted", `  ${selected.model ? `Model Name: ${selected.model.name}` : "Model unavailable"}`),
-					0,
-					0,
-				),
-			);
+			this.listContainer.addChild(new Text(theme.fg("muted", `  ${footerLabel}`), 0, 0));
 		}
 	}
 

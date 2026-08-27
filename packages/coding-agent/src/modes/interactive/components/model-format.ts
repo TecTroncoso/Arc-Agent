@@ -28,3 +28,19 @@ export function maxThinkingLevelLabel(model: Model<any>): string {
 	if (supported(map, "minimal")) return "minimal";
 	return "yes";
 }
+
+/**
+ * Formats a token count for compact display: 200000 -> "200K", 131072 -> "131.1K",
+ * 1000000 -> "1M", 1048576 -> "1.0M". Values below 1000 are shown as-is.
+ */
+export function formatTokenCount(tokens: number): string {
+	if (tokens >= 1_000_000) {
+		const millions = tokens / 1_000_000;
+		return `${Number.isInteger(millions) ? millions : millions.toFixed(1)}M`;
+	}
+	if (tokens >= 1_000) {
+		const thousands = tokens / 1_000;
+		return `${Number.isInteger(thousands) ? thousands : thousands.toFixed(1)}K`;
+	}
+	return String(tokens);
+}

@@ -158,26 +158,6 @@ export function readEnabledModels(agentDir: string): string[] | undefined {
 	return (settings.enabledModels as unknown[]).filter((entry): entry is string => typeof entry === "string");
 }
 
-/**
- * Highest thinking level exposed by a model, or an empty string when the model
- * does not support reasoning. Mirrors the helper in the coding-agent TUI so
- * the model-context command prints the same label the /model selector shows.
- * Null entries in `thinkingLevelMap` are treated as unsupported.
- */
-function maxThinkingLevelLabelInline(model: Model<any>): string {
-	if (!model.reasoning) return "";
-	const map = (model.thinkingLevelMap ?? {}) as Record<string, unknown>;
-	const supported = (level: string): boolean => level in map && map[level] !== null;
-	if (supported("max")) return "max";
-	if (supported("xhigh")) return "xhigh";
-	if (supported("high")) return "high";
-	if (supported("medium")) return "medium";
-	if (supported("low")) return "low";
-	if (supported("minimal")) return "minimal";
-	return "yes";
-}
-
-
 export function buildProviderConfig(
 	baseUrl: string,
 	apiKey: string,
@@ -382,74 +362,6 @@ export default function addProviderExtension(pi: ExtensionAPI): void {
 				ctx.setScopedModels(remaining.length === 0 ? undefined : remaining);
 			}
 			ctx.ui.notify(`Removed ${picked} from models.json.`);
-		},
-	});
-
-	pi.registerCommand("model-context", {
-		description: "Dump full model context (api, baseUrl, compat, thinking map, cost) for one provider or all",
-		handler: async (args: string, ctx: ExtensionCommandContext) => {
-			const target = (args ?? "").trim();
-			const all = ctx.modelRuntime.getAvailableSnapshot();
-			const providers = new Set(all.map((m) => m.provider));
-			if (target) {
-				if (!providers.has(target)) {
-					ctx.ui.notify(
-						`Provider "${target}" not found. Available: ${[...providers].sort().join(", ")}`,
-						"error",
-					);
-					return;
-				}
-			}
-			const header = target
-				? `Model context for "${target}" (${all.filter((m) => m.provider === target).length} model${all.filter((m) => m.provider === target).length === 1 ? "" : "s"})`
-				: `Model context for all providers (${providers.size} provider${providers.size === 1 ? "" : "s"}, ${all.length} model${all.length === 1 ? "" : "s"})`;
-			ctx.ui.notify(header, "info");
-			const grouped = new Map<string, typeof all>();
-			for (const m of all) {
-				if (target && m.provider !== target) continue;
-				const list = grouped.get(m.provider) ?? [];
-				list.push(m);
-				grouped.set(m.provider, list);
-			}
-			const lines: string[] = [];
-			for (const [provider, models] of [...grouped.entries()].sort(([a], [b]) => a.localeCompare(b))) {
-				lines.push(`\n[${provider}]`);
-				const hasAuth = ctx.modelRuntime.hasConfiguredAuth(provider);
-				lines.push(`  auth: ${hasAuth ? "configured" : "missing"}`);
-				const anyCompat = models.some((m) => m.compat);
-				if (anyCompat) lines.push("  compat:");
-				for (const m of models) {
-					const compatKeys = m.compat
-						? Object.keys(m.compat).filter((k) => (m.compat as Record<string, unknown>)[k] !== undefined)
-						: [];
-					if (m.compat && compatKeys.length > 0) {
-						for (const key of compatKeys) {
-							const value = (m.compat as Record<string, unknown>)[key];
-							lines.push(`    ${m.id}.${key} = ${JSON.stringify(value)}`);
-						}
-					}
-				}
-				if (models[0]?.baseUrl) {
-					const firstBase = models[0].baseUrl;
-					const sameBase = models.every((m) => m.baseUrl === firstBase);
-					lines.push(`  baseUrl: ${sameBase ? firstBase : "(varies per model)"}`);
-				}
-				lines.push("  models:");
-				for (const m of models.sort((a, b) => a.id.localeCompare(b.id))) {
-					const thinking = maxThinkingLevelLabelInline(m);
-					const reasoningTag = m.reasoning
-						? thinking
-							? `thinking=${thinking}`
-							: "thinking=yes"
-						: "thinking=no";
-					const cost = `in=${m.cost.input}/out=${m.cost.output}/cr=${m.cost.cacheRead}/cw=${m.cost.cacheWrite}`;
-					const input = m.input.join("+");
-					lines.push(
-						`    ${m.id}  api=${m.api}  ctx=${m.contextWindow}  out=${m.maxTokens}  input=${input}  ${reasoningTag}  ${cost}`,
-					);
-				}
-			}
-			ctx.ui.notify(lines.join("\n"), "info");
 		},
 	});
 }
