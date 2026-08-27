@@ -16,6 +16,7 @@ import { getModelSelectorSearchText } from "../model-search.ts";
 import { theme } from "../theme/theme.ts";
 import { DynamicBorder } from "./dynamic-border.ts";
 import { keyHint } from "./keybinding-hints.ts";
+import { maxThinkingLevelLabel } from "./thinking-level-format.ts";
 
 interface ModelItem {
 	provider: string;
@@ -321,13 +322,17 @@ export class ModelSelectorComponent extends Container implements Focusable {
 				const prefix = theme.fg("accent", "→ ");
 				const modelText = `${item.id}`;
 				const providerBadge = theme.fg("muted", `[${item.provider}]`);
+				const thinkingLabel = maxThinkingLevelLabel(item.model);
+				const thinkingBadge = thinkingLabel ? theme.fg("muted", ` (thinking: ${thinkingLabel})`) : "";
 				const checkmark = isCurrent ? theme.fg("success", " ✓") : "";
-				line = `${prefix + theme.fg("accent", modelText)} ${providerBadge}${defaultBadge}${checkmark}`;
+				line = `${prefix + theme.fg("accent", modelText)} ${providerBadge}${thinkingBadge}${defaultBadge}${checkmark}`;
 			} else {
 				const modelText = `  ${item.id}`;
 				const providerBadge = theme.fg("muted", `[${item.provider}]`);
+				const thinkingLabel = maxThinkingLevelLabel(item.model);
+				const thinkingBadge = thinkingLabel ? theme.fg("muted", ` (thinking: ${thinkingLabel})`) : "";
 				const checkmark = isCurrent ? theme.fg("success", " ✓") : "";
-				line = `${modelText} ${providerBadge}${defaultBadge}${checkmark}`;
+				line = `${modelText} ${providerBadge}${thinkingBadge}${defaultBadge}${checkmark}`;
 			}
 
 			this.listContainer.addChild(new Text(line, 0, 0));

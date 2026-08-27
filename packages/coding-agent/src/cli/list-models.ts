@@ -7,6 +7,7 @@ import { fuzzyFilter } from "@earendil-works/pi-tui";
 import chalk from "chalk";
 import { formatNoModelsAvailableMessage } from "../core/auth-guidance.ts";
 import type { ModelRuntime } from "../core/model-runtime.ts";
+import { maxThinkingLevelLabel } from "../modes/interactive/components/thinking-level-format.ts";
 
 /**
  * Format a number as human-readable (e.g., 200000 -> "200K", 1000000 -> "1M")
@@ -67,7 +68,7 @@ export async function listModels(
 		model: m.id,
 		context: formatTokenCount(m.contextWindow),
 		maxOut: formatTokenCount(m.maxTokens),
-		thinking: m.reasoning ? "yes" : "no",
+		thinking: maxThinkingLevelLabel(m) || "no",
 		images: m.input.includes("image") ? "yes" : "no",
 	}));
 

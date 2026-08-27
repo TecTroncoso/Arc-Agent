@@ -14,6 +14,7 @@ import { getModelSearchText } from "../model-search.ts";
 import { theme } from "../theme/theme.ts";
 import { DynamicBorder } from "./dynamic-border.ts";
 import { keyText } from "./keybinding-hints.ts";
+import { maxThinkingLevelLabel } from "./thinking-level-format.ts";
 
 // EnabledIds: null = all enabled (no filter), string[] = explicit ordered list
 type EnabledIds = string[] | null;
@@ -249,6 +250,8 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 			const id = item.model?.id ?? item.fullId;
 			const modelText = isSelected ? theme.fg("accent", id) : id;
 			const providerBadge = theme.fg("muted", item.model ? ` [${item.model.provider}]` : " [unavailable]");
+			const thinkingLabel = item.model ? maxThinkingLevelLabel(item.model) : "";
+			const thinkingBadge = thinkingLabel ? theme.fg("muted", ` (thinking: ${thinkingLabel})`) : "";
 			const status = item.model
 				? allEnabled
 					? ""
@@ -256,7 +259,7 @@ export class ScopedModelsSelectorComponent extends Container implements Focusabl
 						? theme.fg("success", " ✓")
 						: theme.fg("dim", " ✗")
 				: theme.fg("dim", " ✗");
-			this.listContainer.addChild(new Text(`${prefix}${modelText}${providerBadge}${status}`, 0, 0));
+			this.listContainer.addChild(new Text(`${prefix}${modelText}${providerBadge}${thinkingBadge}${status}`, 0, 0));
 		}
 
 		// Add scroll indicator if needed
