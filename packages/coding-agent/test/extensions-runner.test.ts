@@ -122,13 +122,7 @@ describe("ExtensionRunner", () => {
 		it("forwards setScopedModels from the context to the bound action", async () => {
 			const setScopedModels = vi.fn();
 			const result = await discoverAndLoadExtensions([], tempDir, tempDir);
-			const runner = new ExtensionRunner(
-				result.extensions,
-				result.runtime,
-				tempDir,
-				sessionManager,
-				modelRegistry,
-			);
+			const runner = new ExtensionRunner(result.extensions, result.runtime, tempDir, sessionManager, modelRegistry);
 			runner.bindCore(extensionActions, { ...extensionContextActions, setScopedModels });
 			const ctx = runner.createContext();
 			const next = [{ model: { id: "new-scope" } }] as unknown as ScopedModel[];
@@ -139,13 +133,7 @@ describe("ExtensionRunner", () => {
 		it("forwards setEnabledModels from the context to the bound action", async () => {
 			const setEnabledModels = vi.fn();
 			const result = await discoverAndLoadExtensions([], tempDir, tempDir);
-			const runner = new ExtensionRunner(
-				result.extensions,
-				result.runtime,
-				tempDir,
-				sessionManager,
-				modelRegistry,
-			);
+			const runner = new ExtensionRunner(result.extensions, result.runtime, tempDir, sessionManager, modelRegistry);
 			runner.bindCore(extensionActions, { ...extensionContextActions, setEnabledModels });
 			const ctx = runner.createContext();
 			ctx.setEnabledModels(["anthropic/*", "openai/*"]);
