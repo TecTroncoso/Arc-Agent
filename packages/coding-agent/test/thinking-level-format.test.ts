@@ -43,4 +43,16 @@ describe("maxThinkingLevelLabel", () => {
 	it("walks minimal/low/medium/high when only low is set", () => {
 		expect(maxThinkingLevelLabel(fakeModel(true, { low: "low" }))).toBe("low");
 	});
+
+	it("returns xhigh when only xhigh is supported (no max)", () => {
+		expect(maxThinkingLevelLabel(fakeModel(true, { xhigh: "xhigh" }))).toBe("xhigh");
+	});
+
+	it("returns xhigh when max is explicitly null but xhigh is set", () => {
+		expect(maxThinkingLevelLabel(fakeModel(true, { xhigh: "xhigh", max: null }))).toBe("xhigh");
+	});
+
+	it("returns max when max is present, even alongside xhigh", () => {
+		expect(maxThinkingLevelLabel(fakeModel(true, { off: null, xhigh: "xhigh", max: "max" }))).toBe("max");
+	});
 });
