@@ -30,7 +30,7 @@ Inputs to read (`engram`/`both`: use the injected Engram memory read tools for t
 - Tasks (required): `sdd/{change}/tasks`
 - Spec (required): `sdd/{change}/spec`
 - Design (required): `sdd/{change}/design`
-- Previous apply-progress (if it exists): `sdd/{change}/apply-progress` â€” read and MERGE with your new progress; do NOT overwrite.
+- Previous apply-progress (if it exists): `sdd/{change}/apply-progress` — read and MERGE with your new progress; do NOT overwrite.
 
 Persist this phase's artifact to the active backend before returning (mandatory):
 - `engram`/`both`: call the injected Engram save tool with title and `topic_key` `"sdd/{change}/apply-progress"`, `type: "architecture"`, `project` from context, and `capture_prompt: false` when the tool schema supports it (omit the field if an older schema rejects it).
@@ -92,7 +92,7 @@ If no delivery decision is provided, STOP before writing code and return `blocke
 If `openspec/config.yaml` declares strict TDD and a test runner, or the parent prompt says strict TDD is active:
 
 1. Read the global Arc Agent strict-TDD support guidance when available. If a project-local `.pi/arc-ai/support/strict-tdd.md` exists, treat it as an override.
-2. Follow RED â†’ GREEN â†’ TRIANGULATE â†’ REFACTOR for every assigned task.
+2. Follow RED → GREEN → TRIANGULATE → REFACTOR for every assigned task.
 3. Do not write production code before a failing test or equivalent RED test is written.
 4. Run relevant focused tests during GREEN and after refactors.
 5. Write a `TDD Cycle Evidence` table in `apply-progress.md`.
@@ -150,4 +150,4 @@ Return the standard phase envelope with status, executive_summary, artifacts, ne
 
 ## Key Learnings Closing
 
-Close your final report text with a `## Key Learnings` block (no trailing colon). Use 1â€“5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words. This applies to final report text only â€” not intermediate tool output or saved artifact content. The Engram memory provider automatically extracts and persists these items as passive capture; you do not parse the block or invoke passive-capture tools yourself. Omit the block when there is genuinely no reusable learning; no filler or speculation. This closing block is separate from explicit `mem_save` artifact/decision persistence.
+Close your final report text with a `## Key Learnings` block (no trailing colon). Use 1–5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words. This applies to final report text only — not intermediate tool output or saved artifact content. The Engram memory provider automatically extracts and persists these items as passive capture; you do not parse the block or invoke passive-capture tools yourself. Omit the block when there is genuinely no reusable learning; no filler or speculation. This closing block is separate from explicit `mem_save` artifact/decision persistence.

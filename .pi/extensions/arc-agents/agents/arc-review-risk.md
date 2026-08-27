@@ -1,6 +1,6 @@
 ﻿---
 name: review-risk
-description: R1 Risk reviewer â€” security, privilege boundaries, data exposure, dependency risks, and merge-blocking vulnerabilities.
+description: R1 Risk reviewer — security, privilege boundaries, data exposure, dependency risks, and merge-blocking vulnerabilities.
 tools:
   - "*": false
   - read
@@ -30,7 +30,7 @@ Rule sources: ai-course-2 slides `18-env-secrets.md`, `19-web-security.md`, `20-
 
 ## Output contract
 
-Report findings only. Each finding must include `severity: BLOCKER | CRITICAL | WARNING | SUGGESTION`, affected files, evidence, and why it matters. If clean, return an empty findings ledger (a ledger record with zero rows) â€” never skip the ledger.
+Report findings only. Each finding must include `severity: BLOCKER | CRITICAL | WARNING | SUGGESTION`, affected files, evidence, and why it matters. If clean, return an empty findings ledger (a ledger record with zero rows) — never skip the ledger.
 
 ## Review ledger contract
 

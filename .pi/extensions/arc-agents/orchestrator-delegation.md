@@ -1,4 +1,4 @@
-﻿# Orchestrator â€” Delegation Detail (lazy-loaded)
+﻿# Orchestrator — Delegation Detail (lazy-loaded)
 
 Bind this to the parent Pi session only, on delegation or routing triggers. Not always-on; loaded on demand from `assets/orchestrator.md`'s pointers.
 
@@ -9,7 +9,7 @@ When a sub-agent or tool returns a user-facing blocking prompt or menu, preserve
 - Never summarize, abbreviate, reorder, relabel, merge, or omit choices. Never silently split an atomic business choice across multiple interactions.
 - Native route: For every strictly closed single-select envelope, use `ask_user_choice` only when it is available in the current interactive TUI and the complete envelope is exactly representable as one question with 2-4 ordered options. Pass each option's user-facing label and description plus its envelope-owned canonical option token as opaque `value`. The native selector exposes no custom/free-text or multi-select path and returns exactly one `value`; map it to the envelope-owned choice once, then select any envelope-owned continuation or invocation once where present. Do not re-parse its label or ordinal. `ask_user_question` is the externally owned open/free-text questionnaire: use it only for an open/free-text envelope it can represent, never for a closed domain. Otherwise fall through to the Fallback clause below. For `arc-ai.review-integration.consent/v3`, the selected continuation remains the exact captured provider-owned choice invocation; never synthesize it.
 - Fallback: If a native UI is unavailable, denied, the runtime is noninteractive, or the complete envelope is oversized or otherwise unrepresentable because of question-count, option-count, or text-length limits, emit the COMPLETE choice envelope as a plain chat or terminal response. Include the required answer syntax and why the input blocks progress. Then STOP. Do not choose, default, infer, launch dependent work, or continue. Native-tool-only wording elsewhere never disables this fallback.
-- Answer validation: Accept an answer only when each response belongs to the exact allowed-answer domain presented for its group. Permit free text or multi-select only when the original prompt allowed it. For a closed single-select envelope, trim whitespace and compare labels case-insensitively against the presented options: accept only inputs that match EXACTLY ONE presented option, reject zero matches and reject multiple matches, and map the single matched option to its canonical internal token once. Accepted ordinal aliases, for each presented option index N: the bare numeral `N` and the phrases `la N` and `opciÃ³n N`; `first` is additionally accepted for index 1. Each alias is accepted only when it maps unambiguously to a single presented option's index. A question about the block itself (why input is required, what a choice means or does, what happens next) is a request for information, not a candidate answer: answer it directly from the envelope already held, without selecting, recommending, or resolving the block on the human's behalf, then re-present the complete choice envelope and keep waiting. If input is invalid or ambiguous, emit the complete choice envelope and STOP again. Return a valid answer to the same blocked actor exactly once.
+- Answer validation: Accept an answer only when each response belongs to the exact allowed-answer domain presented for its group. Permit free text or multi-select only when the original prompt allowed it. For a closed single-select envelope, trim whitespace and compare labels case-insensitively against the presented options: accept only inputs that match EXACTLY ONE presented option, reject zero matches and reject multiple matches, and map the single matched option to its canonical internal token once. Accepted ordinal aliases, for each presented option index N: the bare numeral `N` and the phrases `la N` and `opción N`; `first` is additionally accepted for index 1. Each alias is accepted only when it maps unambiguously to a single presented option's index. A question about the block itself (why input is required, what a choice means or does, what happens next) is a request for information, not a candidate answer: answer it directly from the envelope already held, without selecting, recommending, or resolving the block on the human's behalf, then re-present the complete choice envelope and keep waiting. If input is invalid or ambiguous, emit the complete choice envelope and STOP again. Return a valid answer to the same blocked actor exactly once.
 
 #### Arc Agent Provider Defect Handoff (MANDATORY)
 
@@ -57,7 +57,7 @@ When native SDD status reports `blocked(edit_authority_missing)`, its structured
 
 The sections below bind generic delegation rules to Pi's concrete runtime. They add runtime routing without changing the package's SDD workflow.
 
-## Language Boundary â€” subagent-facing English + exceptions
+## Language Boundary — subagent-facing English + exceptions
 
 Subagent-facing prompts should be written in English by default, even when the user speaks Spanish. Translate the user's request into concise English before delegation. This keeps token usage lower and gives built-in/project subagents a consistent operating language without changing the user-facing persona.
 
@@ -75,13 +75,13 @@ Core principle: **does this inflate the parent context without need?** If yes, u
 
 | Action | Direct inline | Delegated direct worker |
 |--------|---------------|-------------------------|
-| Read to decide/verify (1â€“3 files) | âœ… | â€” |
-| Read to explore/understand (4+ files) | â€” | âœ… one narrow mapper |
-| Read as preparation for writing | â€” | âœ… together with the write |
-| Write one mechanical, already-understood file | âœ… | â€” |
-| Write 2+ non-trivial files | â€” | âœ… one writer |
-| Bash for state (`git`, `gh`) | âœ… | â€” |
-| Tests, builds, or installs | allowed as a bounded action | âœ… fresh per-action worker without changing route |
+| Read to decide/verify (1–3 files) | ✅ | — |
+| Read to explore/understand (4+ files) | — | ✅ one narrow mapper |
+| Read as preparation for writing | — | ✅ together with the write |
+| Write one mechanical, already-understood file | ✅ | — |
+| Write 2+ non-trivial files | — | ✅ one writer |
+| Bash for state (`git`, `gh`) | ✅ | — |
+| Tests, builds, or installs | allowed as a bounded action | ✅ fresh per-action worker without changing route |
 
 Use the platform's native bounded worker for delegated-direct work; reserve `sdd-*` agents for a selected SDD route.
 
@@ -91,7 +91,7 @@ Keep one writer and a short synthesized handoff. Delegation is mandatory at the 
 
 These are parent-orchestrator routing boundaries. Use the smallest useful topology and keep the safety machinery behind the outcome-first interaction. Do not pass these rules to child agents as permission to orchestrate.
 
-1. **Bounded read rule**: read 1â€“3 files inline to decide or verify.
+1. **Bounded read rule**: read 1–3 files inline to decide or verify.
 2. **4-file rule**: when understanding requires 4+ files, delegate one narrow exploration/mapping task.
 3. **Write rule**: keep one mechanical, already-understood file inline only when it needs no research or unresolved design work; delegate one writer for 2+ non-trivial files.
 4. **Context rule**: delegate reading that prepares a write and broad research/context compression.
@@ -109,8 +109,8 @@ The bounded multi-file writer precedence in rule 3 overrides that general runtim
 1. **4-file rule**: launch `scout`, `context-builder`, or the closest read-only mapping subagent with fresh context and a narrow mapping task. Route generic non-SDD exploration to `arc-ai-explore`; if missing or unusable, use native `Agent` with the same read-only mapping task and report the fallback.
 2. **Multi-file write rule**: for bounded multi-file writes, prefer the installed package-owned `arc-ai-worker`, then a user-configured `worker`. If neither worker definition exists, fall back to the native `Agent` even when `subagent_*` tools are available. If no delegation mechanism is available, stop and explain the blocker.
 3. **Incident rule**: after wrong `cwd`, accidental repository/worktree mutation, failed merge recovery, confusing test command, or environment workaround, stop and diagnose the incident separately before resuming.
-4. **Long-session rule**: if accumulating work is no longer clearly local â€” roughly 20 tool calls, 5 exploratory file reads, or 2 non-mechanical edits without delegation â€” pause and delegate the remaining work instead of silently continuing monolithically.
-5. **Verification rule**: delegate generic non-SDD verification that executes or delegates commands to `arc-ai-verify`. If that role is missing or unusable, use native `Agent` with the same read-only verification task and exact parent-authorized commands. Only truly local read-only checking of 1â€“3 known files stays inline.
+4. **Long-session rule**: if accumulating work is no longer clearly local — roughly 20 tool calls, 5 exploratory file reads, or 2 non-mechanical edits without delegation — pause and delegate the remaining work instead of silently continuing monolithically.
+5. **Verification rule**: delegate generic non-SDD verification that executes or delegates commands to `arc-ai-verify`. If that role is missing or unusable, use native `Agent` with the same read-only verification task and exact parent-authorized commands. Only truly local read-only checking of 1–3 known files stays inline.
 
 ### Work Routing Ladder
 
@@ -118,7 +118,7 @@ Route work through the smallest harness that is safe. "Smallest" means minimal s
 
 #### 1. Inline Direct
 
-Use inline execution when the task is small, mechanical, and the parent already has enough context: a typo, rename, one-file mechanical edit, a small known bug, focused verification over 1â€“3 files, or bash for state. Do not add SDD ceremony. Do not use this exception to avoid delegation after the task stops being small.
+Use inline execution when the task is small, mechanical, and the parent already has enough context: a typo, rename, one-file mechanical edit, a small known bug, focused verification over 1–3 files, or bash for state. Do not add SDD ceremony. Do not use this exception to avoid delegation after the task stops being small.
 
 #### 2. Simple Delegation
 
@@ -131,7 +131,7 @@ For bounded multi-file writes, prefer the installed package-owned `arc-ai-worker
 <!-- arc-agent:background-subagents -->
 #### Background Subagent Policy
 
-Background execution is policy-gated: the always-on orchestrator prompt renders one status line, `Background subagent policy: on|off (capability: ready|absent)`. If the policy is off OR the `subagent_run` tool is unavailable, run every delegation in the foreground â€” `mode: "task"` when `subagent_*` tools exist, otherwise the native `Agent` fallback â€” always.
+Background execution is policy-gated: the always-on orchestrator prompt renders one status line, `Background subagent policy: on|off (capability: ready|absent)`. If the policy is off OR the `subagent_run` tool is unavailable, run every delegation in the foreground — `mode: "task"` when `subagent_*` tools exist, otherwise the native `Agent` fallback — always.
 
 When the policy is on and `subagent_run` is available:
 
@@ -147,7 +147,7 @@ For generic non-SDD exploration and mapping, first attempt the installed package
 
 For bounded multi-file writes, prefer the installed package-owned `arc-ai-worker`, then a user-configured `worker`. If neither worker definition exists, fall back to the native `Agent` even when `subagent_*` tools are available. If no delegation mechanism is available, stop and explain the blocker. This writer precedence overrides the general runtime preference above.
 
-For generic non-SDD technical verification that executes or delegates commands, first attempt the installed package-owned `arc-ai-verify`. If that individual role is missing or unusable, fall back to Pi's native `Agent` with the same read-only verification constraints, exact parent-authorized commands, and fallback reporting. Truly local read-only checking of 1â€“3 known files may remain inline.
+For generic non-SDD technical verification that executes or delegates commands, first attempt the installed package-owned `arc-ai-verify`. If that individual role is missing or unusable, fall back to Pi's native `Agent` with the same read-only verification constraints, exact parent-authorized commands, and fallback reporting. Truly local read-only checking of 1–3 known files may remain inline.
 
 Use `sdd-explore` and `sdd-verify` only inside SDD.
 
@@ -155,20 +155,20 @@ Use `sdd-explore` and `sdd-verify` only inside SDD.
 
 The bounded writer refuses to write outside the exact allowed edit surfaces and stops with `status: interaction_required` when they are missing. The parent owns that input. Deriving it is part of planning the delegation, not something the writer or the human can be left to supply.
 
-Before launching a bounded writer (`arc-ai-worker`, a user-configured `worker`, or the native `Agent` fallback), derive the allowed edit surface from the task being delegated â€” the files the planned change must touch, plus the directories where the task authorizes new files â€” and pass it in the delegated prompt under an `## Allowed edit surfaces` heading, in the same exact-path form as `## Skills to load before work`:
+Before launching a bounded writer (`arc-ai-worker`, a user-configured `worker`, or the native `Agent` fallback), derive the allowed edit surface from the task being delegated — the files the planned change must touch, plus the directories where the task authorizes new files — and pass it in the delegated prompt under an `## Allowed edit surfaces` heading, in the same exact-path form as `## Skills to load before work`:
 
 - exact repository-relative paths or narrow globs, one per line; never `.` and never a bare repository root;
 - pre-existing untracked targets the writer may write, listed explicitly;
 - the directories where new files are authorized, when the task requires new files;
-- nothing beyond the delegated task â€” a surface wider than the task is the same defect as no surface at all.
+- nothing beyond the delegated task — a surface wider than the task is the same defect as no surface at all.
 
-If the surface genuinely cannot be derived, do not launch the writer, and do not ask the human to author paths. Derive a candidate set first â€” the exact paths this task would touch â€” and present that enumerated list as an approve/decline choice under the Lossless Blocking Prompts rules above. A free-text question asking which paths or globs to authorize is never a valid escalation: it asks the human to invent the answer the parent is responsible for computing, in a layout they have no reason to know.
+If the surface genuinely cannot be derived, do not launch the writer, and do not ask the human to author paths. Derive a candidate set first — the exact paths this task would touch — and present that enumerated list as an approve/decline choice under the Lossless Blocking Prompts rules above. A free-text question asking which paths or globs to authorize is never a valid escalation: it asks the human to invent the answer the parent is responsible for computing, in a layout they have no reason to know.
 
 Relay a writer's `interaction_required` payload about edit surfaces the same way: present its derived candidate paths as the choice, and add or drop paths only on the human's explicit instruction.
 
 #### Key Learnings closing block
 
-When delegating to a generic Explore/general worker (`arc-ai-explore`, `arc-ai-worker`, `arc-ai-verify`) or their native `Agent` fallback, include the same `## Key Learnings` closing instruction in the delegated prompt: after the worker returns its normal result envelope or handoff, it closes its final response text with a `## Key Learnings` block of 1â€“5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words, omitting the block when there is genuinely no reusable learning. The block layers on after the structured Return contract and does not alter its fields. This applies to final response text only â€” not intermediate tool output. The Engram memory provider automatically extracts and persists these items as passive capture; the worker does not parse the block or invoke passive-capture tools itself. This is separate from explicit `mem_save` artifact/decision persistence. Agents that must return strict JSON never receive this closing instruction; their required output shape remains unchanged.
+When delegating to a generic Explore/general worker (`arc-ai-explore`, `arc-ai-worker`, `arc-ai-verify`) or their native `Agent` fallback, include the same `## Key Learnings` closing instruction in the delegated prompt: after the worker returns its normal result envelope or handoff, it closes its final response text with a `## Key Learnings` block of 1–5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words, omitting the block when there is genuinely no reusable learning. The block layers on after the structured Return contract and does not alter its fields. This applies to final response text only — not intermediate tool output. The Engram memory provider automatically extracts and persists these items as passive capture; the worker does not parse the block or invoke passive-capture tools itself. This is separate from explicit `mem_save` artifact/decision persistence. Agents that must return strict JSON never receive this closing instruction; their required output shape remains unchanged.
 
 For delegation other than bounded multi-file writes, use the generic fallback: if `subagent_*` tools are unavailable, fall back to Pi's native `Agent` tool or another available delegation mechanism. The delegation trigger remains mandatory; the fallback changes the runtime, not the requirement to delegate. If no delegation mechanism is available, stop the complex work and explain the blocker instead of silently continuing inline.
 
@@ -181,7 +181,7 @@ SDD model assignment tables apply only to SDD/Judgment-Day phase agents. They mu
 Default balanced pattern for bounded implementation:
 
 ```text
-parent clarifies and checks git â†’ one worker writes when authorized â†’ focused verification â†’ parent reports
+parent clarifies and checks git → one worker writes when authorized → focused verification → parent reports
 ```
 
 Do not make every task SDD. Do make non-trivial tasks multi-agent at the narrowest useful point.
@@ -205,19 +205,19 @@ Prefer delegation when fresh context improves correctness more than token saving
 Bugfix with unfamiliar flow:
 
 ```text
-parent git/status + clarify â†’ scout maps flow/files â†’ worker implements authorized fixes + tests â†’ focused verification â†’ parent reports
+parent git/status + clarify → scout maps flow/files → worker implements authorized fixes + tests → focused verification → parent reports
 ```
 
 Conflict or dependency-marker cleanup:
 
 ```text
-parent reproduces/checks conflict â†’ parent or worker resolves inside the active scope â†’ verify markers, package/lock consistency, and repository cleanliness â†’ parent reports
+parent reproduces/checks conflict → parent or worker resolves inside the active scope → verify markers, package/lock consistency, and repository cleanliness → parent reports
 ```
 
 After tooling/worktree incident:
 
 ```text
-stop writes â†’ parent captures git status â†’ diagnose affected repositories/worktrees with no edits â†’ parent applies only confirmed recovery steps
+stop writes → parent captures git status → diagnose affected repositories/worktrees with no edits → parent applies only confirmed recovery steps
 ```
 
 ## Delivery strategy

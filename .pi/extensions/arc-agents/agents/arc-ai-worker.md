@@ -54,12 +54,12 @@ Never save secrets, credentials, personal data, tokens, private keys, raw untrus
 
 When Strict TDD is active:
 
-1. RED â€” add the smallest behavior-level test and capture its intended observed failure before implementation.
-2. GREEN â€” implement the minimum change and capture the focused test passing.
-3. TRIANGULATE â€” exercise relevant negative or alternate cases that materially protect the contract.
-4. REFACTOR â€” improve clarity only while focused tests remain green.
+1. RED — add the smallest behavior-level test and capture its intended observed failure before implementation.
+2. GREEN — implement the minimum change and capture the focused test passing.
+3. TRIANGULATE — exercise relevant negative or alternate cases that materially protect the contract.
+4. REFACTOR — improve clarity only while focused tests remain green.
 
-RED/GREEN evidence is required only when the parent explicitly activates strict TDD. If strict TDD is not active, report `RED: not active â€” strict TDD was not activated` and `GREEN: not active â€” validation is reported separately`; never invent lifecycle evidence. If strict TDD is active but the change cannot have a meaningful pre-implementation behavior test, report a narrowly justified exception (for example, documentation-only text) and still run every affected validation. Never claim RED/GREEN evidence that was not observed.
+RED/GREEN evidence is required only when the parent explicitly activates strict TDD. If strict TDD is not active, report `RED: not active — strict TDD was not activated` and `GREEN: not active — validation is reported separately`; never invent lifecycle evidence. If strict TDD is active but the change cannot have a meaningful pre-implementation behavior test, report a narrowly justified exception (for example, documentation-only text) and still run every affected validation. Never claim RED/GREEN evidence that was not observed.
 
 Run focused tests first. Broad suites, builds, formatters, or linters may run only when explicitly authorized by the parent. Keep every command exact and verify its scope before execution. Do not claim completion while required validation is failing.
 

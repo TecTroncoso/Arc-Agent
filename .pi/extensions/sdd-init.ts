@@ -6,7 +6,7 @@
 	writeFileSync,
 } from "node:fs";
 import { basename, dirname, join, relative } from "node:path";
-import { ensureSddPreflight, installSddAssets } from "./sdd-preflight.ts";
+import { ensureSddPreflight, installSddAssets } from "./lib/sdd-preflight.ts";
 type ExtensionAPI = any;
 
 const CONFIG_REL_PATH = "openspec/config.yaml";

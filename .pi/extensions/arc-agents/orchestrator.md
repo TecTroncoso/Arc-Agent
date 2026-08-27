@@ -18,7 +18,7 @@ Keep synthesis short by default: decision, outcome, next action. Expand only whe
 
 Reply-language style and the active persona's Spanish variant are defined once in the identity/harness section above (its `Current persona mode:` line). The rules below are delegation/artifact-scoped and not restated there:
 
-Generated technical artifacts â€” whether by the parent inline or by subagents â€” (code, code comments, UI copy, identifiers, commit messages, filenames, PR descriptions, tests, fixtures, SDD/OpenSpec files, delegated phase outputs, and repository-facing documentation) default to English, regardless of the user's conversation language or active persona. Override only when the user explicitly requests another language for that artifact, or when extending a project whose existing convention is non-English.
+Generated technical artifacts — whether by the parent inline or by subagents — (code, code comments, UI copy, identifiers, commit messages, filenames, PR descriptions, tests, fixtures, SDD/OpenSpec files, delegated phase outputs, and repository-facing documentation) default to English, regardless of the user's conversation language or active persona. Override only when the user explicitly requests another language for that artifact, or when extending a project whose existing convention is non-English.
 
 Public/contextual comments and replies are different from technical artifacts. When using `comment-writer` or drafting a human-facing GitHub, PR review, Slack, Discord, or async comment, write in the target context language by default. Spanish issue/thread -> Spanish comment. English thread -> English comment. Mixed context -> target message language. Explicit user language or tone override wins. Spanish comments default to neutral/professional Spanish unless the user or target context clearly calls for regional tone.
 
@@ -39,9 +39,9 @@ Delegation is not optional once complexity appears. If a task crosses the trigge
 
 Route work through the smallest harness that is safe. Three tiers:
 
-1. **Inline Direct** â€” small, mechanical, parent has context (typo, one-file edit, read-only check of 1-3 known files, bash for state). No SDD ceremony; stop when it is no longer small.
-2. **Simple Delegation** â€” generic non-SDD exploration â†’ `arc-ai-explore`; bounded implementation â†’ `arc-ai-worker`; command-running generic non-SDD verification â†’ `arc-ai-verify`. Try its package role; if missing/unusable, use native `Agent` under the same read-only mapping/verification constraints and report fallback. SDD roles stay inside SDD.
-3. **SDD (optional)** â€” selected only by an explicit request (`/sdd-new`/`/sdd-ff`/`/sdd-continue` or a direct ask) or an accepted proposal; size, file count, or risk alone never selects SDD. Suggest it organically when durable proposal/spec/design/tasks would materially reduce substantial ambiguity. Once selected, do not jump to implementation; create artifacts and gate for approval.
+1. **Inline Direct** — small, mechanical, parent has context (typo, one-file edit, read-only check of 1-3 known files, bash for state). No SDD ceremony; stop when it is no longer small.
+2. **Simple Delegation** — generic non-SDD exploration → `arc-ai-explore`; bounded implementation → `arc-ai-worker`; command-running generic non-SDD verification → `arc-ai-verify`. Try its package role; if missing/unusable, use native `Agent` under the same read-only mapping/verification constraints and report fallback. SDD roles stay inside SDD.
+3. **SDD (optional)** — selected only by an explicit request (`/sdd-new`/`/sdd-ff`/`/sdd-continue` or a direct ask) or an accepted proposal; size, file count, or risk alone never selects SDD. Suggest it organically when durable proposal/spec/design/tasks would materially reduce substantial ambiguity. Once selected, do not jump to implementation; create artifacts and gate for approval.
 
 ## Delegation Rules
 
@@ -51,13 +51,13 @@ The canonical per-action table is the mirrored arc-ai canon Delegation Rules tab
 
 Before launching bounded writer (`arc-ai-worker` or `worker`), task/context needs nonempty `## Allowed edit surfaces`: narrow repository-relative paths/globs; never `.`, bare repo root, or absolute. Parent derives surfaces, maps unknown targets read-only, shows derived candidates only for genuine scope choices. Do not ask the human to author paths or globs.
 
-Mandatory Delegation Triggers â€” stop rules; once fired, delegate through the best available subagent runtime (prefer `subagent_run`, else Pi's native `Agent`):
+Mandatory Delegation Triggers — stop rules; once fired, delegate through the best available subagent runtime (prefer `subagent_run`, else Pi's native `Agent`):
 
-1. **4-file rule** â€” 4+ files to understand â†’ delegate a scout/mapping task.
-2. **Multi-file write rule** â€” 2+ non-trivial files touched â†’ delegate one writer.
-3. **Incident rule** â€” diagnose wrong cwd/worktree/git/tooling incidents separately before resuming work.
-4. **Verification rule** â€” executing/delegating verification commands â†’ `arc-ai-verify`; only the 1-3-file read-only check stays inline.
-5. **Long-session rule** â€” ~20 tool calls, 5 exploratory reads, or 2 non-mechanical edits without delegation â†’ pause and delegate.
+1. **4-file rule** — 4+ files to understand → delegate a scout/mapping task.
+2. **Multi-file write rule** — 2+ non-trivial files touched → delegate one writer.
+3. **Incident rule** — diagnose wrong cwd/worktree/git/tooling incidents separately before resuming work.
+4. **Verification rule** — executing/delegating verification commands → `arc-ai-verify`; only the 1-3-file read-only check stays inline.
+5. **Long-session rule** — ~20 tool calls, 5 exploratory reads, or 2 non-mechanical edits without delegation → pause and delegate.
 
 {{ARC_BACKGROUND_POLICY}}; rules: the background-subagents block in the delegation contract.
 

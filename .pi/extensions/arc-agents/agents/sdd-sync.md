@@ -47,7 +47,7 @@ Sync file-backed SDD change specs into canonical `openspec/specs/` without movin
 
 Before syncing, consume structured SDD status from the parent prompt. If missing, produce the same fields using this lookup order: project override `.pi/arc-ai/support/sdd-status-contract.md`, then globally installed `~/.pi/agent/arc-ai/support/sdd-status-contract.md`, then the embedded status contract. Do not use `assets/support/...` as a runtime path; that is only the package source path before installation.
 
-**Non-authoritative carve-out:** when native status JSON shows `nextRecommended: "resolve-via-engram"` (covers `artifactStore: engram`, `artifactStore: none`, and `artifactStore: both` without an `openspec/` directory), the status is non-authoritative. Do not treat `dependencies` or `blockedReasons` from that status as real blockers. For `engram` store, refer to the Artifact Store Modes section â€” sync is not applicable; return a report explaining that canonical spec merge is not supported in Engram-only mode.
+**Non-authoritative carve-out:** when native status JSON shows `nextRecommended: "resolve-via-engram"` (covers `artifactStore: engram`, `artifactStore: none`, and `artifactStore: both` without an `openspec/` directory), the status is non-authoritative. Do not treat `dependencies` or `blockedReasons` from that status as real blockers. For `engram` store, refer to the Artifact Store Modes section — sync is not applicable; return a report explaining that canonical spec merge is not supported in Engram-only mode.
 
 Stop with `blocked` if:
 
@@ -139,4 +139,4 @@ Return the standard phase envelope with status, executive_summary, artifacts, ne
 
 ## Key Learnings Closing
 
-Close your final report text with a `## Key Learnings` block (no trailing colon). Use 1â€“5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words. This applies to final report text only â€” not intermediate tool output or saved artifact content. The Engram memory provider automatically extracts and persists these items as passive capture; you do not parse the block or invoke passive-capture tools yourself. Omit the block when there is genuinely no reusable learning; no filler or speculation. This closing block is separate from explicit `mem_save` artifact/decision persistence.
+Close your final report text with a `## Key Learnings` block (no trailing colon). Use 1–5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words. This applies to final report text only — not intermediate tool output or saved artifact content. The Engram memory provider automatically extracts and persists these items as passive capture; you do not parse the block or invoke passive-capture tools yourself. Omit the block when there is genuinely no reusable learning; no filler or speculation. This closing block is separate from explicit `mem_save` artifact/decision persistence.

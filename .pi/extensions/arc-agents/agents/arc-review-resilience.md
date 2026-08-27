@@ -1,6 +1,6 @@
 ﻿---
 name: review-resilience
-description: R4 Resilience reviewer â€” fallbacks, retry/backoff, graceful degradation, observability, load, rollback, and SLO risks.
+description: R4 Resilience reviewer — fallbacks, retry/backoff, graceful degradation, observability, load, rollback, and SLO risks.
 tools:
   - "*": false
   - read
@@ -28,7 +28,7 @@ Rule sources: ai-course-2 slides `09-essential-metrics.md`, `13-observability-st
 
 ## Output contract
 
-Report findings only. Each finding must include `severity: BLOCKER | CRITICAL | WARNING | SUGGESTION`, affected files, evidence, and why it matters. If clean, return an empty findings ledger (a ledger record with zero rows) â€” never skip the ledger.
+Report findings only. Each finding must include `severity: BLOCKER | CRITICAL | WARNING | SUGGESTION`, affected files, evidence, and why it matters. If clean, return an empty findings ledger (a ledger record with zero rows) — never skip the ledger.
 
 ## Review ledger contract
 

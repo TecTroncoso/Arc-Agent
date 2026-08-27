@@ -1,4 +1,4 @@
-﻿# Orchestrator â€” Memory Detail (lazy-loaded)
+﻿# Orchestrator — Memory Detail (lazy-loaded)
 
 Bind this to the parent Pi session only, on SDD phase memory reads/writes. Not always-on; loaded on demand from `assets/orchestrator.md`'s `## Memory Contract` pointer.
 

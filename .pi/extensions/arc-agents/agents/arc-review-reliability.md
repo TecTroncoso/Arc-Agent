@@ -1,6 +1,6 @@
 ﻿---
 name: review-reliability
-description: R3 Reliability reviewer â€” behavior-first tests, coverage value, edge cases, determinism, contracts, and regressions.
+description: R3 Reliability reviewer — behavior-first tests, coverage value, edge cases, determinism, contracts, and regressions.
 tools:
   - "*": false
   - read
@@ -29,7 +29,7 @@ Rule sources: ai-course-2 slides `01-testing-setup.md`, `02-tdd-implementation.m
 
 ## Output contract
 
-Report findings only. Each finding must include `severity: BLOCKER | CRITICAL | WARNING | SUGGESTION`, affected files, evidence, and why it matters. If clean, return an empty findings ledger (a ledger record with zero rows) â€” never skip the ledger.
+Report findings only. Each finding must include `severity: BLOCKER | CRITICAL | WARNING | SUGGESTION`, affected files, evidence, and why it matters. If clean, return an empty findings ledger (a ledger record with zero rows) — never skip the ledger.
 
 ## Review ledger contract
 

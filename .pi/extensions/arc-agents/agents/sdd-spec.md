@@ -51,15 +51,15 @@ In `openspec` and `both` / `hybrid` modes, use this layout:
 
 ```text
 openspec/
-â”œâ”€â”€ specs/
-â”‚   â””â”€â”€ {domain}/
-â”‚       â””â”€â”€ spec.md                  # canonical accepted behavior
-â””â”€â”€ changes/
-    â””â”€â”€ {change}/
-        â”œâ”€â”€ proposal.md
-        â””â”€â”€ specs/
-            â””â”€â”€ {domain}/
-                â””â”€â”€ spec.md          # change spec or delta spec
+├── specs/
+│   └── {domain}/
+│       └── spec.md                  # canonical accepted behavior
+└── changes/
+    └── {change}/
+        ├── proposal.md
+        └── specs/
+            └── {domain}/
+                └── spec.md          # change spec or delta spec
 ```
 
 Read the proposal's `Capabilities` section first when present:
@@ -185,4 +185,4 @@ Return the standard phase envelope with status, executive_summary, artifacts, ne
 
 ## Key Learnings Closing
 
-Close your final report text with a `## Key Learnings` block (no trailing colon). Use 1â€“5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words. This applies to final report text only â€” not intermediate tool output or saved artifact content. The Engram memory provider automatically extracts and persists these items as passive capture; you do not parse the block or invoke passive-capture tools yourself. Omit the block when there is genuinely no reusable learning; no filler or speculation. This closing block is separate from explicit `mem_save` artifact/decision persistence.
+Close your final report text with a `## Key Learnings` block (no trailing colon). Use 1–5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words. This applies to final report text only — not intermediate tool output or saved artifact content. The Engram memory provider automatically extracts and persists these items as passive capture; you do not parse the block or invoke passive-capture tools yourself. Omit the block when there is genuinely no reusable learning; no filler or speculation. This closing block is separate from explicit `mem_save` artifact/decision persistence.

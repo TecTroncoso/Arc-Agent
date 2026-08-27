@@ -55,7 +55,7 @@ Put this near the top of `tasks.md`:
 | Estimated changed lines | <rough estimate or range> |
 | 400-line budget risk | Low / Medium / High |
 | Chained PRs recommended | Yes / No |
-| Suggested split | <single PR or PR 1 â†’ PR 2 â†’ PR 3> |
+| Suggested split | <single PR or PR 1 → PR 2 → PR 3> |
 | Delivery strategy | <ask-on-risk / auto-chain / single-pr / exception-ok> |
 | Chain strategy | <stacked-to-main / feature-branch-chain / size-exception / pending> |
 ```
@@ -92,7 +92,7 @@ Use `implementation` for RED/GREEN/TRIANGULATE/REFACTOR, code, tests, and apply-
 
 - Every task references concrete file paths or concrete discovery targets.
 - Tasks are specific, actionable, verifiable, and dependency ordered.
-- If tests exist or strict TDD is enabled, sequence tasks as RED â†’ GREEN â†’ TRIANGULATE â†’ REFACTOR.
+- If tests exist or strict TDD is enabled, sequence tasks as RED → GREEN → TRIANGULATE → REFACTOR.
 - Each task should fit one focused session; split oversized tasks.
 - Keep `tasks.md` concise and reviewable.
 - Do NOT launch child subagents. Parent/orchestrator owns delegation.
@@ -102,4 +102,4 @@ Return the standard phase envelope with status, executive_summary, artifacts, ne
 
 ## Key Learnings Closing
 
-Close your final report text with a `## Key Learnings` block (no trailing colon). Use 1â€“5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words. This applies to final report text only â€” not intermediate tool output or saved artifact content. The Engram memory provider automatically extracts and persists these items as passive capture; you do not parse the block or invoke passive-capture tools yourself. Omit the block when there is genuinely no reusable learning; no filler or speculation. This closing block is separate from explicit `mem_save` artifact/decision persistence.
+Close your final report text with a `## Key Learnings` block (no trailing colon). Use 1–5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words. This applies to final report text only — not intermediate tool output or saved artifact content. The Engram memory provider automatically extracts and persists these items as passive capture; you do not parse the block or invoke passive-capture tools yourself. Omit the block when there is genuinely no reusable learning; no filler or speculation. This closing block is separate from explicit `mem_save` artifact/decision persistence.

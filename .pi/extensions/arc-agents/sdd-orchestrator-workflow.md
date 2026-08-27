@@ -7,15 +7,15 @@ This is the lazy-loaded SDD workflow surface for Arc Agent on Pi. Read this file
 SDD phases:
 
 ```text
-init â†’ explore â†’ research (optional) â†’ proposal â†’ spec â†’ design â†’ tasks â†’ apply â†’ verify â†’ sync â†’ archive
+init → explore → research (optional) → proposal → spec → design → tasks → apply → verify → sync → archive
 ```
 
 Dependency graph:
 
 ```text
-explore â†’ research (optional) â†’ proposal
-proposal â†’ spec â”€â”¬â†’ tasks â†’ apply â†’ verify â†’ sync â†’ archive
-proposal â†’ design â”˜
+explore → research (optional) → proposal
+proposal → spec ─┬→ tasks → apply → verify → sync → archive
+proposal → design ┘
 ```
 
 `/sdd-status [change]` is the read-only status action for resolving the active change, artifact paths, task progress, dependency readiness, and action context before apply/verify/sync/archive.
@@ -27,7 +27,7 @@ The user expresses intent; they should not have to administer phases manually. F
 Flow:
 
 ```text
-user intent â†’ preflight/init guard â†’ native status engine â†’ phase decision â†’ subagent gets status JSON + generated instructions â†’ artifact/progress write â†’ status recalculation â†’ continue or stop
+user intent → preflight/init guard → native status engine → phase decision → subagent gets status JSON + generated instructions → artifact/progress write → status recalculation → continue or stop
 ```
 
 Rules:
@@ -36,7 +36,7 @@ Rules:
 - `/sdd-continue` is the native dispatcher command: resolve status, choose the next ready phase, and carry status/instructions into the subagent prompt.
 - `sdd-apply`, `sdd-verify`, `sdd-sync`, and `sdd-archive` must obey parent-provided native status; they must not reconstruct readiness from prompt inference when status JSON is present.
 - Do not launch a phase when native status marks that dependency `blocked`.
-- `sdd-archive` cannot proceed unless native status says `dependencies.archive` is `ready` or `all_done` â€” UNLESS the store carve-out is active (`nextRecommended: "resolve-via-engram"`), in which case resolve archive readiness from Engram instead of treating `not_applicable` as a gate failure.
+- `sdd-archive` cannot proceed unless native status says `dependencies.archive` is `ready` or `all_done` — UNLESS the store carve-out is active (`nextRecommended: "resolve-via-engram"`), in which case resolve archive readiness from Engram instead of treating `not_applicable` as a gate failure.
 - **Non-authoritative store carve-out:** when `nextRecommended: "resolve-via-engram"` is set, native status is **not authoritative**. This applies to `artifactStore: engram`, `artifactStore: none`, and `artifactStore: both` when the `openspec/` directory does not exist. For non-authoritative stores: resolve readiness from Engram using the Engram memory tools injected by the memory provider on the change topic keys (`sdd/{change-name}/proposal`, `sdd/{change-name}/spec`, `sdd/{change-name}/design`, `sdd/{change-name}/tasks`, etc.). Do **not** treat `blockedReasons` or `not_applicable` dependency states from the native engine as real blockers when the store carve-out is active.
 
 ## SDD Status Contract
@@ -118,7 +118,7 @@ In interactive mode, between phases:
 
 Interactive approval is phase-scoped. A user response such as "continue", "dale", or "go on" approves only the immediate next phase, not the rest of the SDD pipeline. Do not treat a generated artifact as approved until the user has had a chance to review or explicitly delegate that review.
 
-Before `sdd-proposal` in interactive mode, offer the user a proposal question round instead of silently deciding whether the proposal is clear enough. Explain that the questions are meant to improve the PRD/proposal by uncovering business understanding, business rules, implications, impact, edge cases, and product tradeoffs. Prefer 3â€“5 concrete product questions per round, then summarize the resulting assumptions and ask whether the user wants to correct anything or run a second question round. Cover business/product/PRD decisions: business problem, target users and situations, business rules, product outcome, current-state gap, implications and impact, edge cases, decision gaps, first-slice scope boundaries, non-goals, product constraints, and business tradeoffs. Do not ask about test commands, PR shape, changed-line budget, or other harness mechanics at proposal time unless the user explicitly asks to discuss delivery.
+Before `sdd-proposal` in interactive mode, offer the user a proposal question round instead of silently deciding whether the proposal is clear enough. Explain that the questions are meant to improve the PRD/proposal by uncovering business understanding, business rules, implications, impact, edge cases, and product tradeoffs. Prefer 3–5 concrete product questions per round, then summarize the resulting assumptions and ask whether the user wants to correct anything or run a second question round. Cover business/product/PRD decisions: business problem, target users and situations, business rules, product outcome, current-state gap, implications and impact, edge cases, decision gaps, first-slice scope boundaries, non-goals, product constraints, and business tradeoffs. Do not ask about test commands, PR shape, changed-line budget, or other harness mechanics at proposal time unless the user explicitly asks to discuss delivery.
 
 ## Research and Pre-Proposal Gate
 
@@ -128,7 +128,7 @@ This gate is MANDATORY and applies in both execution modes; in interactive mode 
 - Before every proposal, invoke `sdd-proposal` only when selected research is `done` or research is unselected, product decisions are `confirmed`, evidence references are valid, and the selected artifact-store state is ready.
 - The orchestrator owns product discovery. In automatic mode, unresolved product choices require one lossless grouped prompt with all context, options, consequences, allowed answers, and exact tokens; the orchestrator MUST persist the pending pre-proposal state before prompting, then STOP without invoking `sdd-proposal`.
 - The proposer receives a confirmed pre-proposal handoff and MUST NOT interview the user or infer consent.
-- Pi's native `arc-agent.sdd-status` contract remains the sole status contract. Research and pre-proposal state are orchestrator-owned prose and artifacts (`sdd/{change}/research`, `sdd/{change}/preproposal`, `openspec/changes/{change}/research.md`) layered on top â€” never a native status field.
+- Pi's native `arc-agent.sdd-status` contract remains the sole status contract. Research and pre-proposal state are orchestrator-owned prose and artifacts (`sdd/{change}/research`, `sdd/{change}/preproposal`, `openspec/changes/{change}/research.md`) layered on top — never a native status field.
 
 Runtime note: this runtime declares no evidence grants (`documentation=[]; open-web=[]`), so a SELECTED research lane fail-closes to a `blocked` outcome and blocks proposal readiness until the user deselects research or evidence capability arrives. SDD chains treat research as unselected.
 
@@ -136,10 +136,10 @@ Runtime note: this runtime declares no evidence grants (`documentation=[]; open-
 
 On the first SDD chain request in a session, resolve the delivery strategy from preflight (or ask once) and cache it:
 
-- `ask-on-risk` â€” default; ask only when the tasks forecast detects review-budget risk.
-- `auto-chain` â€” automatically split into chained/stacked PR slices when needed.
-- `single-pr` â€” proceed as one PR only if the size is within budget.
-- `exception-ok` â€” user accepts `size:exception` when over budget. The preflight menu cannot select this; it is reached only when the user explicitly accepts `size:exception`, either up front or when `ask-on-risk` stops to ask.
+- `ask-on-risk` — default; ask only when the tasks forecast detects review-budget risk.
+- `auto-chain` — automatically split into chained/stacked PR slices when needed.
+- `single-pr` — proceed as one PR only if the size is within budget.
+- `exception-ok` — user accepts `size:exception` when over budget. The preflight menu cannot select this; it is reached only when the user explicitly accepts `size:exception`, either up front or when `ask-on-risk` stops to ask.
 
 These four are the whole domain. Pass `delivery_strategy` to `sdd-tasks` and `sdd-apply`.
 
@@ -147,8 +147,8 @@ These four are the whole domain. Pass `delivery_strategy` to `sdd-tasks` and `sd
 
 When delivery planning yields chained PRs, ask once for chain strategy and cache it:
 
-- `stacked-to-main` â€” each PR targets the previous PR branch or main in sequence.
-- `feature-branch-chain` â€” PR #1 targets the tracker branch; child PRs target the immediate previous PR branch; only the tracker merges to main.
+- `stacked-to-main` — each PR targets the previous PR branch or main in sequence.
+- `feature-branch-chain` — PR #1 targets the tracker branch; child PRs target the immediate previous PR branch; only the tracker merges to main.
 
 When chained PRs are selected, treat the registry skill `arc-ai-chained-pr` as a required skill match. Resolve and forward it by registry path to `sdd-tasks` and `sdd-apply`; do not hardcode its path.
 
@@ -189,7 +189,7 @@ Use cost-aware validation:
 
 - For lower-risk phases (`sdd-explore`, `sdd-research`, `sdd-spec`, `sdd-tasks`, `sdd-sync`, `sdd-archive`), the parent may validate inline by reading artifacts back and checking claims.
 - For higher-risk phases (`sdd-design`, `sdd-apply`), validate the artifact, declared paths, task state, and focused test evidence directly before continuing because errors there compound downstream.
-- If a gate finds any smell â€” missing artifact, status mismatch, unresolved path, likely drift, or critical risk â€” rerun the same SDD phase once with corrective feedback. SDD phase validation does not start ordinary review or Judgment Day.
+- If a gate finds any smell — missing artifact, status mismatch, unresolved path, likely drift, or critical risk — rerun the same SDD phase once with corrective feedback. SDD phase validation does not start ordinary review or Judgment Day.
 
 On gate pass, continue automatically to the next phase. On gate fail, rerun the same phase exactly once with corrective feedback naming the specific failures. Validate the rerun. If it fails again, stop the automatic chain and report the phase, failures from both attempts, and the recommended fix. Never advance to dependent phases on a failed gate.
 
@@ -239,7 +239,7 @@ Read this table before the first SDD/Judgment-Day phase delegation in a session,
 
 On Pi, phase model routing is user-owned and persisted, not prompt-passed: `/model` selects the session model, and installed phase agent definitions carry their own frontmatter `model:`/`thinking:` defaults, optionally overridden via `.pi/settings.json`. The table below is the default capability tier per phase when the user has saved no assignment.
 
-**Mandatory phase model gate:** before launching an SDD/Judgment-Day phase agent, confirm the phase resolves through the saved model config or these defaults. Never pass an ad-hoc `model` parameter for SDD/Judgment-Day phases, and never apply this table to generic Pi delegation â€” generic subagents resolve model/thinking through `pi-subagents` config, and `model` is passed there only on an explicit user override.
+**Mandatory phase model gate:** before launching an SDD/Judgment-Day phase agent, confirm the phase resolves through the saved model config or these defaults. Never pass an ad-hoc `model` parameter for SDD/Judgment-Day phases, and never apply this table to generic Pi delegation — generic subagents resolve model/thinking through `pi-subagents` config, and `model` is passed there only on an explicit user override.
 
 | Phase        | Default tier   | Reason                                     |
 | ------------ | -------------- | ------------------------------------------ |
@@ -287,7 +287,7 @@ Do not rely on the child agent to discover this independently.
 
 ## Archive Final-State Handoff
 
-When launching `sdd-archive`, forward explicit final-state facts for any work completed after `apply-progress`, `verify-report`, or `sync-report` were persisted â€” verify warnings fixed in later commits, blockers resolved, tasks finished, updated test or issue counts â€” with commit or evidence references where available. Those artifacts are intermediate snapshots, valid at the time they were written; the archive report records the state at close, and explicit final-state facts in the `sdd-archive` launch prompt outrank stale snapshot claims.
+When launching `sdd-archive`, forward explicit final-state facts for any work completed after `apply-progress`, `verify-report`, or `sync-report` were persisted — verify warnings fixed in later commits, blockers resolved, tasks finished, updated test or issue counts — with commit or evidence references where available. Those artifacts are intermediate snapshots, valid at the time they were written; the archive report records the state at close, and explicit final-state facts in the `sdd-archive` launch prompt outrank stale snapshot claims.
 
 ## Review Workload Guard
 
@@ -310,9 +310,9 @@ Automatic mode does not override reviewer burnout protection.
 
 ## Recovery
 
-- `engram` â†’ resolve state with the injected memory search/get tools on the change topic keys (`sdd/{change-name}/...`).
-- `openspec` â†’ read `openspec/changes/<change>/` artifacts and re-derive readiness through the native status engine.
-- `none` â†’ state is not persisted; explain the limitation.
+- `engram` → resolve state with the injected memory search/get tools on the change topic keys (`sdd/{change-name}/...`).
+- `openspec` → read `openspec/changes/<change>/` artifacts and re-derive readiness through the native status engine.
+- `none` → state is not persisted; explain the limitation.
 
 ## Provider Defect Handoff
 

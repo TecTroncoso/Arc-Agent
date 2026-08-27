@@ -28,7 +28,7 @@ Inputs to read (`engram`/`both`: use the injected Engram memory read tools for t
 
 - Whichever change artifacts are needed to compute status, named `sdd/{change}/<phase>` (proposal, spec, design, tasks, apply-progress, verify-report, sync-report).
 
-Do not persist anything â€” status is a read-only report. Never claim persistence.
+Do not persist anything — status is a read-only report. Never claim persistence.
 
 ## Inputs
 
@@ -108,7 +108,7 @@ If parent context reports `workspace-planning` and no `allowedEditRoots`, mark a
 - `sync` is `ready` when verify-report exists and has no unresolved `FAIL`, `BLOCKED`, `CRITICAL`, or verification blockers; it is `not_applicable` for `engram`/`none` modes.
 - `archive` is `ready` only when verify-report is passing, sync-report exists or sync is not applicable, and no unchecked implementation tasks remain. CRITICAL verification issues have no override. Explicit recorded exceptions are limited to non-critical partial archives or stale-checkbox reconciliation when apply-progress/verify-report prove completion.
 
-**Non-authoritative carve-out:** when `nextRecommended: "resolve-via-engram"` or `isNonAuthoritative: true` is set on the status object, the `dependencies`, `applyState`, and `blockedReasons` fields are non-authoritative â€” they must not be treated as real blockers. This condition applies when the artifact store is `engram`, `none`, or `both` without an `openspec/` directory present on disk. For `engram`/`both-without-openspec`, resolve readiness directly from Engram using the Engram memory tools injected by the memory provider on the change topic keys (`sdd/{change}/proposal`, `sdd/{change}/spec`, `sdd/{change}/design`, `sdd/{change}/tasks`, etc.). For `none`, return inline status or ask the user â€” do not use the engine's `not_applicable`/`blockedReasons` as real gate failures.
+**Non-authoritative carve-out:** when `nextRecommended: "resolve-via-engram"` or `isNonAuthoritative: true` is set on the status object, the `dependencies`, `applyState`, and `blockedReasons` fields are non-authoritative — they must not be treated as real blockers. This condition applies when the artifact store is `engram`, `none`, or `both` without an `openspec/` directory present on disk. For `engram`/`both-without-openspec`, resolve readiness directly from Engram using the Engram memory tools injected by the memory provider on the change topic keys (`sdd/{change}/proposal`, `sdd/{change}/spec`, `sdd/{change}/design`, `sdd/{change}/tasks`, etc.). For `none`, return inline status or ask the user — do not use the engine's `not_applicable`/`blockedReasons` as real gate failures.
 
 ## Output
 
@@ -117,4 +117,4 @@ Return the standard phase envelope with status, executive_summary, artifacts, ne
 
 ## Key Learnings Closing
 
-Close your final report text with a `## Key Learnings` block (no trailing colon). Use 1â€“5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words. This applies to final report text only â€” not intermediate tool output or saved artifact content. The Engram memory provider automatically extracts and persists these items as passive capture; you do not parse the block or invoke passive-capture tools yourself. Omit the block when there is genuinely no reusable learning; no filler or speculation. This closing block is separate from explicit `mem_save` artifact/decision persistence.
+Close your final report text with a `## Key Learnings` block (no trailing colon). Use 1–5 numbered items, each a standalone factual sentence of at least 20 characters and at least 4 words. This applies to final report text only — not intermediate tool output or saved artifact content. The Engram memory provider automatically extracts and persists these items as passive capture; you do not parse the block or invoke passive-capture tools yourself. Omit the block when there is genuinely no reusable learning; no filler or speculation. This closing block is separate from explicit `mem_save` artifact/decision persistence.
