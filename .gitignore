@@ -46,3 +46,5 @@ plans/
 collect.sh
 abrir_proyecto.bat
 
+# Local Arc Agent runtime state
+.arc/

@@ -1,4 +1,4 @@
----
+﻿---
 name: arc-skill-improver
 description: "Trigger: improve skills, audit skills, refactor skills, skill quality. Audit and upgrade existing LLM-first skills."
 license: Apache-2.0
@@ -15,7 +15,7 @@ Use this skill when auditing, refactoring, normalizing, or improving existing `S
 
 - Read `docs/skill-style-guide.md` first and treat it as the normative style contract.
 - Treat `SKILL.md` as the source of truth; preserve author intent, critical rules, activation semantics, and output requirements.
-- Use `.atl/skill-registry.md` as an index of skill names, triggers, scopes, and exact paths when available.
+- Use `.arc/skill-registry.md` as an index of skill names, triggers, scopes, and exact paths when available.
 - Default to audit-only. Modify files only when the user explicitly asks to apply improvements.
 - Never delete meaningful content silently; move long explanation, examples, templates, or schemas into local `references/` or `assets/`.
 - Do not invent triggers, policies, or domain rules. Mark ambiguous cases for human review.
@@ -33,7 +33,7 @@ Use this skill when auditing, refactoring, normalizing, or improving existing `S
 ## Execution Steps
 
 1. Read `docs/skill-style-guide.md`.
-2. Read `.atl/skill-registry.md`; use listed paths to select skills. If missing, scan known skill directories for `*/SKILL.md`.
+2. Read `.arc/skill-registry.md`; use listed paths to select skills. If missing, scan known skill directories for `*/SKILL.md`.
 3. For each selected skill, audit metadata, trigger clarity, section order, body budget, actionability, decision gates, output contract, and local references.
 4. Return an audit report grouped by skill with severity and exact proposed changes.
 5. In apply mode, edit only safe issues, preserve content, create supporting files when needed, then refresh or request `/skill-registry:refresh`.
@@ -49,5 +49,5 @@ Return:
 
 ## References
 
-- `docs/skill-style-guide.md` — normative LLM-first skill style guide.
-- `skills/skill-registry/SKILL.md` — registry refresh and indexing contract.
+- `docs/skill-style-guide.md` â€” normative LLM-first skill style guide.
+- `skills/skill-registry/SKILL.md` â€” registry refresh and indexing contract.
