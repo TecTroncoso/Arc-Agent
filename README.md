@@ -38,6 +38,25 @@ The repository ships with an extension in `.pi/extensions/add-provider.ts` that 
 
 Both commands keep the `enabledModels` filter in `~/.pi/agent/settings.json` in sync, so `/model` only shows the providers you have actually added.
 
+## Profiles
+
+The repository ships an extension in `.pi/extensions/profile-switcher.ts` that exposes the `/profile` slash command. Profiles bundle a persona, thinking level, and `enabledModels` filter into named presets stored in `~/.pi/agent/profiles/<name>.json`. The first time `/profile` runs, it seeds three built-in profiles:
+
+* **`pi`** *(default)* — vanilla Pi. The system prompt is left untouched; the model behaves exactly as the upstream Pi agent. No persona is prepended.
+* **`arc`** — Arc Agent senior-architect mode. The system prompt is **replaced** with the body of `.pi/skills/arc-orchestrator/SKILL.md` for every turn, so the model runs with the full discipline (Identity Rule, Compact Rules, Work Routing, Hard delegation triggers). Also applies `setThinkingLevel(medium)` and `setEnabledModels([openrouter/*, emperoorg/*, opencodezen/*])`.
+* **`minimal`** — no persona, `thinking=off`, no scoped defaults. Useful for fast one-shot prompts where you want zero ceremony.
+
+Switching is one command and reversible at any time:
+
+```
+/profile            # show the picker
+/profile arc        # activate the arc profile
+/profile pi         # go back to vanilla Pi
+/profile current    # show the active profile
+```
+
+The persona switch is enforced via the `before_agent_start` hook, so the change takes effect on the very next turn — no restart required. Custom profiles can be added by dropping additional JSON files into `~/.pi/agent/profiles/`.
+
 ## Development
 
 ```bash
@@ -67,6 +86,10 @@ The repository ships a curated set of reusable skills under `.pi/skills/`. Skill
 * **`rdd-defect-workflow`** — discover, fix, and re-verify a defect through the review pipeline. Collapses to a single discover+fix pass without the external review binary.
 
 A reusable prompt at `.pi/prompts/skill-creation.md` is available for guided skill authoring. The shared review contract used by the review-related skills lives in [`docs/upstream-review-contract.md`](docs/upstream-review-contract.md).
+
+## Project initialization
+
+The `/sdd-init` slash command (extension at `.pi/extensions/sdd-init.ts`) scaffolds the SDD/OpenSpec layout that the `arc-orchestrator` and review skills expect. Run it inside the project you want to initialize and it will create `.arc/`, `.arc/agents/`, `.arc/chains/`, `.arc/support/`, and `.arc/migrations/` from the bundled templates in `.pi/extensions/arc-agents/`. Run it again on an already-initialized project and it will detect the existing layout and offer to migrate or refresh. No external binaries required.
 
 ## Building standalone binaries
 
