@@ -21,6 +21,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
+import { ARC_PERSONA_FALLBACK } from "./personas.ts";
+import { pickFromList, type UI } from "./lib/ui-helpers.ts";
 
 type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
 
@@ -34,22 +36,6 @@ interface Profile {
 	scopedModels?: Array<{ provider: string; modelId: string; thinkingLevel?: ThinkingLevel }>;
 	theme?: string;
 }
-
-const ARC_PERSONA_PREFIX = `# Arc Agent persona (active profile)
-
-You are Arc Agent, a Pi-specific coding-agent harness with a senior-architect persona, SDD/OpenSpec artifacts, and subagent coordination. Do not answer as a generic assistant.
-
-## Compact Rules
-
-- Clarify scope, constraints, acceptance criteria, and non-goals before implementation.
-- Use OpenSpec-style artifacts for proposal, specs, design, tasks, apply progress, verify report, and archive notes.
-- If tests exist, follow strict TDD: RED, GREEN, TRIANGULATE, REFACTOR, and record evidence.
-- Keep one parent session responsible for orchestration; child subagents receive concrete phase work and must not spawn more subagents.
-- Forecast review workload before large changes; ask before producing oversized or multi-area diffs.
-- Keep dangerous-command safety independent and authoritative.
-- For skill-shaped requests, check the registry/filesystem for a more specific skill before generic execution.
-
-`;
 
 function readArcOrchestratorSkill(cwd: string): string | undefined {
 	const skillPath = join(cwd, ".pi", "skills", "arc-orchestrator", "SKILL.md");
@@ -85,22 +71,20 @@ function agentDir(): string {
 	return process.env.PI_CODING_AGENT_DIR?.trim() || join(homedir(), ".pi", "agent");
 }
 
-function profilesDir(): string {
-	return join(agentDir(), "profiles");
-}
-
-function activeProfilePath(): string {
-	return join(agentDir(), "active-profile.json");
-}
-
-function profilePath(name: string): string {
-	return join(profilesDir(), `${name}.json`);
+function readJson(path: string, fallback: unknown): unknown {
+	if (!existsSync(path)) return fallback;
+	try {
+		return JSON.parse(readFileSync(path, "utf8"));
+	} catch {
+		return fallback;
+	}
 }
 
 function ensureBuiltinProfiles(): void {
-	mkdirSync(profilesDir(), { recursive: true });
+	const profilesDir = join(agentDir(), "profiles");
+	mkdirSync(profilesDir, { recursive: true });
 	for (const [name, profile] of Object.entries(BUILTIN_PROFILES)) {
-		const p = profilePath(name);
+		const p = join(profilesDir, `${name}.json`);
 		if (!existsSync(p)) {
 			writeFileSync(p, JSON.stringify(profile, null, 2), "utf8");
 		}
@@ -108,29 +92,18 @@ function ensureBuiltinProfiles(): void {
 }
 
 function readProfile(name: string): Profile | undefined {
-	const p = profilePath(name);
-	if (!existsSync(p)) return undefined;
-	try {
-		return JSON.parse(readFileSync(p, "utf8")) as Profile;
-	} catch {
-		return undefined;
-	}
+	return readJson(join(agentDir(), "profiles", `${name}.json`), undefined) as Profile | undefined;
 }
 
 function readActiveProfileName(): string {
-	const p = activeProfilePath();
-	if (!existsSync(p)) return "pi";
-	try {
-		const j = JSON.parse(readFileSync(p, "utf8")) as { name?: string };
-		return j.name && BUILTIN_PROFILES[j.name] ? j.name : "pi";
-	} catch {
-		return "pi";
-	}
+	const j = readJson(join(agentDir(), "active-profile.json"), {}) as { name?: string };
+	return j.name && BUILTIN_PROFILES[j.name] ? j.name : "pi";
 }
 
 function writeActiveProfileName(name: string): void {
-	mkdirSync(dirname(activeProfilePath()), { recursive: true });
-	writeFileSync(activeProfilePath(), JSON.stringify({ name }, null, 2), "utf8");
+	const path = join(agentDir(), "active-profile.json");
+	mkdirSync(dirname(path), { recursive: true });
+	writeFileSync(path, JSON.stringify({ name }, null, 2), "utf8");
 }
 
 function listProfileNames(): string[] {
@@ -150,12 +123,7 @@ type ExtensionAPI = {
 		event: "before_agent_start",
 		handler: (event: { systemPrompt: string }) => { systemPrompt?: string } | undefined | void,
 	): void;
-	ui: {
-		select: (title: string, options: string[]) => Promise<string | undefined>;
-		input: (title: string, preset?: string) => Promise<string | undefined>;
-		confirm: (title: string, defaultValue?: boolean) => Promise<boolean | undefined>;
-		notify: (message: string, kind?: "info" | "warning" | "error") => void;
-	};
+	ui: UI;
 	setThinkingLevel?: (level: ThinkingLevel) => void;
 	setEnabledModels?: (patterns: string[] | undefined) => void;
 	setScopedModels?: (
@@ -179,7 +147,7 @@ export default function (pi: ExtensionAPI): void {
 		if (skillContent) {
 			return { systemPrompt: skillContent };
 		}
-		return { systemPrompt: ARC_PERSONA_PREFIX };
+		return { systemPrompt: ARC_PERSONA_FALLBACK };
 	});
 
 	pi.registerCommand("profile", {
@@ -200,8 +168,8 @@ export default function (pi: ExtensionAPI): void {
 
 			if (args === "" || args === "list") {
 				if (hasUI) {
-					const choice = await ui.select(`Active profile: ${current}`, ["(no change)", ...names]);
-					if (!choice || choice === "(no change)") {
+					const choice = await pickFromList(ui, `Active profile: ${current}`, names, "(no change)");
+					if (!choice) {
 						ui.notify(`Profile unchanged: ${current}`, "info");
 						return;
 					}
