@@ -1,0 +1,35 @@
+# Arc Agent customizations to re-apply after resetting the branch to
+# a new upstream pi tag.
+#
+# One repo-relative path per line. Lines starting with `#` are
+# comments. Empty lines are ignored. Paths that did not exist at the
+# previous HEAD are silently skipped by the upgrade script.
+
+# Arc Agent extensions under .pi/extensions/
+.pi/extensions/add-provider.ts
+.pi/extensions/ask-user-choice.ts
+.pi/extensions/codegraph-tools.ts
+.pi/extensions/lib/personas.ts
+.pi/extensions/lib/ui-helpers.ts
+.pi/extensions/mcp-client.ts
+.pi/extensions/profile-switcher.ts
+.pi/extensions/sdd-init.ts
+.pi/extensions/skill-registry.ts
+.pi/extensions/arc-agents
+
+# Arc Agent skills, prompts, and supporting files
+.pi/skills
+.pi/prompts/skill-creation.md
+.pi/prompts/cl.md
+.pi/prompts/is.md
+.pi/prompts/pr.md
+.pi/prompts/sa.md
+.pi/prompts/wr.md
+
+# Arc Agent rebrand surfaces
+README.md
+CHANGELOG.md
+docs/upstream-review-contract.md
+openspec
+.pi/git/.gitignore
+.pi/npm/.gitignore
