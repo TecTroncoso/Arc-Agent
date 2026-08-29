@@ -1,6 +1,6 @@
 {
 	"name": "@earendil-works/pi-coding-agent",
-	"version": "0.84.4",
+	"version": "0.84.4-arc.1",
 	"description": "Coding agent CLI with read, bash, edit, write tools and session management",
 	"type": "module",
 	"piConfig": {
@@ -104,3 +104,4 @@
 		"node": ">=22.19.0"
 	}
 }
+
