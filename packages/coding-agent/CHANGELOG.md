@@ -1,5 +1,18 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **Arc Agent branding** — rebrand of pi under `@earendil-works` scope with the Arc Agent identity.
+- **`/add-provider` slash command** — interactively add any OpenAI-compatible endpoint (Ollama, OpenRouter, gateways, custom servers) with auto-discovery of the server's `/v1/models` list and live metadata extraction (context window, max tokens, pricing) when the endpoint exposes them. Implementation at `.pi/extensions/add-provider.ts`.
+- **`/remove-provider` slash command** — list and remove providers added through `/add-provider`. Maintains `enabledModels` in sync.
+- **`/profile` slash command** — switch between named persona/runtime presets (`pi`, `arc`, `minimal`). The `arc` profile replaces the system prompt with the body of `.pi/skills/arc-orchestrator/SKILL.md` for every turn. Profiles live in `~/.pi/agent/profiles/<name>.json`. Implementation at `.pi/extensions/profile-switcher.ts`.
+- **MCP client** — Arc Agent is now a Model Context Protocol client. Reads `~/.pi/agent/mcp.json` (Anthropic format), spawns each configured stdio server, performs the JSON-RPC 2.0 handshake, and re-exposes the server's tools through `pi.registerTool` as `mcp__<server>__<tool>`. Supports `tools/list` and `tools/call` with timeouts and graceful shutdown. Implementation at `.pi/extensions/mcp-client.ts`.
+- **SDD/OpenSpec scaffolding** — `/sdd-init` slash command installs the `.arc/` directory layout (agents, chains, support, migrations) from the bundled `.pi/extensions/arc-agents/` assets. Implementation at `.pi/extensions/sdd-init.ts`.
+- **13 curated skills** in `.pi/skills/` covering orchestration (`arc-orchestrator`), PR/release workflows (`arc-branch-pr`, `arc-chained-pr`, `release`, `work-unit-commits`), documentation (`cognitive-doc-design`, `comment-writer`), issue/decision flows (`arc-issue-creation`, `arc-judgment-day`, `arc-rdd-defect-workflow`), and skill meta (`arc-skill-creator`, `arc-skill-improver`, `arc-skill-registry`).
+- **`pi-pretty` integration shim** — wraps `@heyhuynhgiabuu/pi-pretty` as a no-op when the optional dependency is not installed.
+
 ## [0.84.4] - 2026-08-28
 
 ### New Features
