@@ -79,6 +79,46 @@ function loadModelsJsonOrNotify(
 	}
 }
 
+/**
+ * Push the just-added provider into the live runtime so /model and
+ * /scoped-models pick it up without a session reload. Returns true when
+ * the on-disk `enabledModels` filter was updated successfully; the
+ * in-vivo setters are best-effort and degrade silently on older pi
+ * versions that do not expose them.
+ */
+function refreshRuntimeProviderVisibility(
+	ctx: ExtensionCommandContext,
+	providerId: string,
+	modelIds: string[],
+): boolean {
+	if (!updateEnabledModels(getAgentDir(), providerId, true)) {
+		ctx.ui.notify(
+			`Could not update enabledModels in settings.json; add "${providerId}/*" manually.`,
+			"warning",
+		);
+		return false;
+	}
+	if (typeof ctx.setEnabledModels === "function") {
+		const current = ctx.scopedModels;
+		const snapshot = readEnabledModels(getAgentDir());
+		if (snapshot && !snapshot.includes(`${providerId}/*`)) {
+			ctx.setEnabledModels([...snapshot, `${providerId}/*`]);
+		}
+		if (typeof ctx.setScopedModels === "function") {
+			const newModels = modelIds
+				.map((id) => ctx.modelRegistry.getModel(providerId, id))
+				.filter((m): m is Model<any> => m !== undefined)
+				.map((model) => ({ model }));
+			const known = new Set(current.map((s) => `${s.model.provider}/${s.model.id}`));
+			const additions = newModels.filter((s) => !known.has(`${s.model.provider}/${s.model.id}`));
+			if (additions.length > 0) {
+				ctx.setScopedModels([...current, ...additions]);
+			}
+		}
+	}
+	return true;
+}
+
 export function normalizeBaseUrl(raw: string): string | undefined {
 	const trimmed = raw.trim();
 	if (!trimmed) return undefined;
@@ -388,34 +428,9 @@ export default function addProviderExtension(pi: ExtensionAPI): void {
 			// Register immediately so /model picks it up without a restart.
 			pi.registerProvider(providerId, providerConfig);
 
-			// Scope /model to explicitly added providers only.
-			if (!updateEnabledModels(getAgentDir(), providerId, true)) {
-				ctx.ui.notify(`Could not update enabledModels in settings.json; add "${providerId}/*" manually.`, "warning");
-			} else {
-				// Refresh the runtime's view of enabledModels so the new glob takes
-				// effect without a session reload. Older pi versions without these
-				// setters keep the old on-disk-only behaviour.
-				if (typeof ctx.setEnabledModels === "function") {
-					const current = ctx.scopedModels;
-					const snapshot = readEnabledModels(getAgentDir());
-					if (snapshot && !snapshot.includes(`${providerId}/*`)) {
-						ctx.setEnabledModels([...snapshot, `${providerId}/*`]);
-					}
-					// setScopedModels so /scoped-models and Ctrl+P cycling pick up the
-					// new provider's models right away.
-					if (typeof ctx.setScopedModels === "function") {
-						const newModels = modelIds
-							.map((id) => ctx.modelRegistry.getModel(providerId, id))
-							.filter((m): m is Model<any> => m !== undefined)
-							.map((model) => ({ model }));
-						const known = new Set(current.map((s) => `${s.model.provider}/${s.model.id}`));
-						const additions = newModels.filter((s) => !known.has(`${s.model.provider}/${s.model.id}`));
-						if (additions.length > 0) {
-							ctx.setScopedModels([...current, ...additions]);
-						}
-					}
-				}
-			}
+			// Scope /model to explicitly added providers only and push the new
+			// provider's models into the live runtime.
+			refreshRuntimeProviderVisibility(ctx, providerId, modelIds);
 
 			const enriched = selected.filter((m) => m.contextWindow !== undefined || m.cost !== undefined).length;
 			const metadataNote = enriched > 0 ? ` Endpoint metadata (context/cost) applied to ${enriched} model${enriched === 1 ? "" : "s"}.` : "";
