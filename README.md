@@ -19,6 +19,11 @@ Arc Agent is an interactive coding agent CLI for the terminal. It is a fork of t
 * Plug any OpenAI-compatible endpoint (local servers, OpenRouter, gateways, custom providers) with a single slash command.
 * Ship a CLI and a standalone binary straight from this repository.
 
+> **Branch / version status**
+>
+> * `feat/mcp-client` runs Arc Agent **0.84.4-arc.1** on top of upstream pi v0.84.4. This is the active development branch.
+> * `main` and `feat/gentle-pi-options` are still on Arc Agent 0.84.3 (upstream pi v0.84.3). The pre-upgrade state of every branch is preserved as a `backup/pre-0.84.4-*` tag if you need to roll back.
+
 ## Packages
 
 | Package | Description |
