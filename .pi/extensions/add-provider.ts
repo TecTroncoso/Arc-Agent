@@ -56,6 +56,29 @@ function modelsJsonPath(): string {
 	return join(getAgentDir(), "models.json");
 }
 
+/** No-op if the command was already invoked from an interactive TUI session. */
+function requireTui(ctx: ExtensionCommandContext): boolean {
+	if (ctx.mode !== "tui") {
+		ctx.ui.notify("/add-provider is available in interactive mode", "warning");
+		return false;
+	}
+	return true;
+}
+
+/** Read models.json and bail with a notify if it is missing or malformed. */
+function loadModelsJsonOrNotify(
+	path: string,
+	ctx: ExtensionCommandContext,
+): ModelsJson | undefined {
+	try {
+		return loadModelsJson(path);
+	} catch (error) {
+		const message = error instanceof Error ? error.message : String(error);
+		ctx.ui.notify(`Cannot parse ${path}: ${message}. Fix or remove the file first.`, "error");
+		return undefined;
+	}
+}
+
 export function normalizeBaseUrl(raw: string): string | undefined {
 	const trimmed = raw.trim();
 	if (!trimmed) return undefined;
@@ -304,10 +327,7 @@ export default function addProviderExtension(pi: ExtensionAPI): void {
 	pi.registerCommand("add-provider", {
 		description: "Add an OpenAI-compatible provider (prompts for base URL and API key)",
 		handler: async (args: string, ctx: ExtensionCommandContext) => {
-			if (ctx.mode !== "tui") {
-				ctx.ui.notify("/add-provider is available in interactive mode", "warning");
-				return;
-			}
+			if (!requireTui(ctx)) return;
 
 			const baseUrl = await promptBaseUrl(ctx, args.trim());
 			if (!baseUrl) return;
@@ -346,14 +366,8 @@ export default function addProviderExtension(pi: ExtensionAPI): void {
 			);
 
 			const path = modelsJsonPath();
-			let config: ModelsJson;
-			try {
-				config = loadModelsJson(path);
-			} catch (error) {
-				const message = error instanceof Error ? error.message : String(error);
-				ctx.ui.notify(`Cannot parse ${path}: ${message}. Fix or remove the file first.`, "error");
-				return;
-			}
+			const config = loadModelsJsonOrNotify(path, ctx);
+			if (!config) return;
 			config.providers ??= {};
 			if (config.providers[providerId] !== undefined) {
 				const overwrite = await ctx.ui.confirm(
@@ -414,20 +428,11 @@ export default function addProviderExtension(pi: ExtensionAPI): void {
 	pi.registerCommand("remove-provider", {
 		description: "Remove a custom provider from models.json",
 		handler: async (_args: string, ctx: ExtensionCommandContext) => {
-			if (ctx.mode !== "tui") {
-				ctx.ui.notify("/remove-provider is available in interactive mode", "warning");
-				return;
-			}
+			if (!requireTui(ctx)) return;
 
 			const path = modelsJsonPath();
-			let config: ModelsJson;
-			try {
-				config = loadModelsJson(path);
-			} catch (error) {
-				const message = error instanceof Error ? error.message : String(error);
-				ctx.ui.notify(`Cannot parse ${path}: ${message}`, "error");
-				return;
-			}
+			const config = loadModelsJsonOrNotify(path, ctx);
+			if (!config) return;
 			const ids = Object.keys(config.providers ?? {}).sort();
 			if (ids.length === 0) {
 				ctx.ui.notify("No providers configured in models.json");
