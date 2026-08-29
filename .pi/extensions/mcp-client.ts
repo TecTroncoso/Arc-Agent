@@ -77,6 +77,22 @@ interface PendingRequest {
 	timer: NodeJS.Timeout;
 }
 
+/**
+ * One MCP server over stdio.
+ *
+ * Spawns a child process, drives the JSON-RPC 2.0 transport on its
+ * stdin/stdout, runs the `initialize` handshake + `notifications/initialized`
+ * acknowledgement, and pulls the initial tool list. Once `ready` resolves,
+ * `getTools()` returns the discovered tools and `callTool` forwards
+ * `tools/call` requests to the server.
+ *
+ * Error and lifecycle handling: a request that fails on the server side
+ * rejects with an `Error("MCP error <code>: <message>")`. A request that
+ * exceeds `REQUEST_TIMEOUT_MS` rejects with a timeout error. If the
+ * child process exits, all in-flight requests reject with an exit error.
+ * Callers should `await ensureReady()` before interacting and call `close()`
+ * on shutdown to send `shutdown` and kill the process.
+ */
 class McpStdioClient {
 	private proc: ChildProcessWithoutNullStreams;
 	private buffer = "";
@@ -316,6 +332,19 @@ function inputSchemaToTypeBox(schema: unknown): ReturnType<typeof Type.Object> {
 	return Type.Object(shape, { additionalProperties: true });
 }
 
+/**
+ * Arc Agent extension entry point. Wires the JSON-RPC transport (one
+ * `McpStdioClient` per configured server) into pi's tool registry, so
+ * the LLM can call any MCP server tool as if it were a native pi tool.
+ *
+ * Lifecycle:
+ *   1. Read `~/.pi/agent/mcp.json`.
+ *   2. For each server, spawn the process and run the handshake.
+ *   3. As each server's `tools/list` returns, register every tool as
+ *      `mcp__<server>__<tool>` via `pi.registerTool`.
+ *   4. On `session_shutdown`, send `shutdown` to each server and kill
+ *      the process.
+ */
 export default function mcpClientExtension(pi: {
 	registerTool: (tool: {
 		name: string;
