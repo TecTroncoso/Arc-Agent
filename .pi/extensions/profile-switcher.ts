@@ -21,7 +21,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { homedir } from "node:os";
-import { ARC_PERSONA_FALLBACK } from "./personas.ts";
+import { ARC_PERSONA_FALLBACK } from "./lib/personas.ts";
 import { pickFromList, type UI } from "./lib/ui-helpers.ts";
 
 type ThinkingLevel = "off" | "minimal" | "low" | "medium" | "high" | "xhigh" | "max";
