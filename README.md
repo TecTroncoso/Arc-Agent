@@ -1,114 +1,152 @@
 <p align="center">
-  <a href="https://pi.dev">
-    <img alt="pi logo" src="https://pi.dev/logo-auto.svg" width="128">
-  </a>
+  <h1 align="center">Arc Agent</h1>
+  <p align="center">
+    Interactive, self-extensible coding agent CLI. Forked and maintained by
+    <a href="https://github.com/TecTroncoso">@TecTroncoso</a>.
+  </p>
 </p>
 <p align="center">
-  <a href="https://discord.com/invite/3cU7Bz4UPx"><img alt="Discord" src="https://img.shields.io/badge/discord-community-5865F2?style=flat-square&logo=discord&logoColor=white" /></a>
-  <a href="https://www.npmjs.com/package/@earendil-works/pi-coding-agent"><img alt="npm" src="https://img.shields.io/npm/v/@earendil-works/pi-coding-agent?style=flat-square" /></a>
+  <a href="https://github.com/TecTroncoso/Arc-Agent/issues"><img alt="Issues" src="https://img.shields.io/github/issues/TecTroncoso/Arc-Agent?style=flat-square" /></a>
+  <a href="https://github.com/TecTroncoso/Arc-Agent/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/github/license/TecTroncoso/Arc-Agent?style=flat-square" /></a>
+  <a href="https://github.com/TecTroncoso/Arc-Agent/commits/main"><img alt="Last commit" src="https://img.shields.io/github/last-commit/TecTroncoso/Arc-Agent?style=flat-square" /></a>
 </p>
 
-> New issues and PRs from new contributors are auto-closed by default. Maintainers review auto-closed issues daily. See [CONTRIBUTING.md](CONTRIBUTING.md).
+# Arc Agent
 
-# Pi Agent Harness
+Arc Agent is an interactive coding agent CLI for the terminal. It is a fork of the Pi Agent Harness maintained by [@TecTroncoso](https://github.com/TecTroncoso), focused on a clean configuration and a zero-noise contribution workflow.
 
-This is the home of the Pi agent harness project including our self extensible coding agent.
+* Run an LLM-driven coding agent in your terminal with read/edit/write/bash tools.
+* Plug any OpenAI-compatible endpoint (local servers, OpenRouter, gateways, custom providers) with a single slash command.
+* Ship a CLI and a standalone binary straight from this repository.
 
-* **[@earendil-works/pi-coding-agent](packages/coding-agent)**: Interactive coding agent CLI
-* **[@earendil-works/pi-agent-core](packages/agent)**: Agent runtime with tool calling and state management
-* **[@earendil-works/pi-ai](packages/ai)**: Unified multi-provider LLM API (OpenAI, Anthropic, Google, …)
-
-To learn more about Pi:
-
-* [Visit pi.dev](https://pi.dev), the project website with demos
-* [Read the documentation](https://pi.dev/docs/latest), but you can also ask the agent to explain itself
-
-## All Packages
+## Packages
 
 | Package | Description |
 |---------|-------------|
-| **[@earendil-works/pi-telemetry](packages/telemetry)** | Vendor-neutral telemetry contracts, reference adapter, conformance tests, and typed schemas |
-| **[@earendil-works/pi-ai](packages/ai)** | Unified multi-provider LLM API (OpenAI, Anthropic, Google, etc.) |
-| **[@earendil-works/pi-agent-core](packages/agent)** | Agent runtime with tool calling and state management |
 | **[@earendil-works/pi-coding-agent](packages/coding-agent)** | Interactive coding agent CLI |
+| **[@earendil-works/pi-agent-core](packages/agent)** | Agent runtime with tool calling and state management |
+| **[@earendil-works/pi-ai](packages/ai)** | Unified multi-provider LLM API (OpenAI, Anthropic, Google, etc.) |
 | **[@earendil-works/pi-tui](packages/tui)** | Terminal UI library with differential rendering |
+| **[@earendil-works/pi-telemetry](packages/telemetry)** | Vendor-neutral telemetry contracts and reference adapter |
 
-For Slack/chat automation and workflows see [earendil-works/pi-chat](https://github.com/earendil-works/pi-chat).
+## Adding OpenAI-compatible providers without editing code
 
-## Permissions & Containerization
+The repository ships with an extension in `.pi/extensions/add-provider.ts` that exposes two slash commands in the interactive CLI:
 
-Pi does not include a built-in permission system for restricting filesystem, process, network, or credential access. By default, it runs with the permissions of the user and process that launched it.
+* **`/add-provider [url]`** — interactively prompts for `baseUrl`, `apiKey`, and an internal id; queries `{baseUrl}/models`; lets you pick all models or a subset; and persists the configuration to `~/.pi/agent/models.json`. The new provider is registered live, so it is selectable from `/model` immediately.
+* **`/remove-provider`** — lists configured providers and removes the chosen one from both `models.json` and the live registry.
 
-If you need stronger boundaries, containerize or sandbox Pi. See [packages/coding-agent/docs/containerization.md](packages/coding-agent/docs/containerization.md) for three patterns:
+Both commands keep the `enabledModels` filter in `~/.pi/agent/settings.json` in sync, so `/model` only shows the providers you have actually added.
 
-- **Gondolin extension**: keep `pi` and provider auth on the host while routing built-in tools and `!` commands into a local Linux micro-VM.
-- **Plain Docker**: run the whole `pi` process in a local container for simple isolation.
-- **OpenShell**: run the whole `pi` process in a policy-controlled sandbox.
+## Model Context Protocol (MCP) client
 
-## Contributing
+Arc Agent ships with a built-in MCP client extension at `.pi/extensions/mcp-client.ts`. The extension reads `~/.pi/agent/mcp.json`, spawns each configured server, performs the JSON-RPC handshake over stdio, and re-exports the server's tools through the same tool registry the LLM uses for native tools. No extra runtime dependencies are required.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution guidelines and [AGENTS.md](AGENTS.md) for project-specific rules (for both humans and agents).  Longer term plans for Pi can also be found in [RFCs](https://rfc.earendil.com/keyword/pi/).
+Drop servers into `~/.pi/agent/mcp.json` in the standard Anthropic format:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "C:\\path\\to\\root"]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": { "GITHUB_TOKEN": "ghp_..." }
+    }
+  }
+}
+```
+
+Tools from MCP servers are registered with a qualified name of the form `mcp__<server>__<tool>` so they never collide with built-in tools or with tools from other servers. The LLM sees them like any other tool, and you can call them with the same tool-use flow.
+
+What works:
+
+* `stdio` transport (the most common one for local servers).
+* `initialize` / `notifications/initialized` handshake.
+* `tools/list` discovery and `tools/call` invocation.
+* Per-server startup timeout (10s) and per-request timeout (30s).
+* Graceful shutdown of all spawned servers on `session_shutdown`.
+* Servers that fail to start are logged and skipped, so one bad server does not take the others down.
+
+What is not implemented yet:
+
+* `http` and `sse` transports (only `stdio` is supported today; servers with `"type": "http"` or `"url": "..."` are skipped with a warning).
+* `prompts`, `resources`, `sampling`, `roots`, `elicitation` (only `tools/*` methods are wired up).
+
+If a server entry uses `http`/`sse`, the extension logs a warning and skips it. Servers that start successfully are added to the tool registry; a slow startup (more than 10s) is also treated as a failure and skipped.
+
+## Profiles
+
+The repository ships an extension in `.pi/extensions/profile-switcher.ts` that exposes the `/profile` slash command. Profiles bundle a persona, thinking level, and `enabledModels` filter into named presets stored in `~/.pi/agent/profiles/<name>.json`. The first time `/profile` runs, it seeds three built-in profiles:
+
+* **`pi`** *(default)* — vanilla Pi. The system prompt is left untouched; the model behaves exactly as the upstream Pi agent. No persona is prepended.
+* **`arc`** — Arc Agent senior-architect mode. The system prompt is **replaced** with the body of `.pi/skills/arc-orchestrator/SKILL.md` for every turn, so the model runs with the full discipline (Identity Rule, Compact Rules, Work Routing, Hard delegation triggers). Also applies `setThinkingLevel(medium)` and `setEnabledModels([openrouter/*, emperoorg/*, opencodezen/*])`.
+* **`minimal`** — no persona, `thinking=off`, no scoped defaults. Useful for fast one-shot prompts where you want zero ceremony.
+
+Switching is one command and reversible at any time:
+
+```
+/profile            # show the picker
+/profile arc        # activate the arc profile
+/profile pi         # go back to vanilla Pi
+/profile current    # show the active profile
+```
+
+The persona switch is enforced via the `before_agent_start` hook, so the change takes effect on the very next turn — no restart required. Custom profiles can be added by dropping additional JSON files into `~/.pi/agent/profiles/`.
 
 ## Development
 
 ```bash
 npm install --ignore-scripts  # Install all dependencies without running lifecycle scripts
-npm run build         # Refresh model data, then build all packages
-npm run build:offline # Rebuild using existing model data without network access
-npm run check         # Lint, format, and type check
-./test.sh            # Run tests (skips LLM-dependent tests without API keys)
-./pi-test.sh         # Run pi from sources (can be run from any directory)
+npm run hydrate:model-data    # Fetch provider model catalogs (required before the first check/build)
+npm run build                 # Build all packages
+npm run build:offline         # Rebuild using cached model data without network access
+npm run check                 # Lint, format, and type check
+./test.sh                     # Run the test suite (skips tests that need live API keys)
+./pi-test.bat                 # Run the CLI from sources on Windows
+./pi-test.sh                  # Run the CLI from sources on Unix
 ```
 
-## Building standalone binaries from release source
+## Skills
 
-GitHub releases include a versioned source archive covered by the release's `SHA256SUMS` file. Extract it and run the same build script used for the official standalone binaries:
+The repository ships a curated set of reusable skills under `.pi/skills/`. Skills auto-load when their trigger description matches the user's request, and all are renamed to Arc Agent branding.
 
-```bash
-VERSION="<release-version>"
-tar -xzf "pi-${VERSION}-source.tar.gz"
-cd "pi-${VERSION}"
-./scripts/build-binaries.sh --offline-model-data --platform linux-x64 --out "$PWD/out"
-```
+* **`arc-orchestrator`** — senior-architect discipline for non-trivial work. Auto-loads on complex tasks, refactors, architecture decisions, multi-file changes, OpenSpec, TDD, and risky changes; skips trivial edits.
+* **`branch-pr`** / **`chained-pr`** — open, link, and chain pull requests across dependent branches.
+* **`cognitive-doc-design`** — design documents that match how the model reasons about code.
+* **`comment-writer`** — write code review comments in a consistent house style.
+* **`issue-creation`** — file issues with enough context to be actionable.
+* **`release`** — orchestrate a release: changelog, version bump, tag, publish.
+* **`work-unit-commits`** — break a change into a series of logically-named commits.
+* **`skill-creator`** / **`skill-improver`** / **`skill-registry`** — create, refine, and list skills.
+* **`judgment-day`** — multi-perspective review of a focused change. Falls back to a single self-review pass when the external review binary is not installed; explicitly notes when that happens.
+* **`rdd-defect-workflow`** — discover, fix, and re-verify a defect through the review pipeline. Collapses to a single discover+fix pass without the external review binary.
 
-The source archive includes the generated provider model data used for the release. `--offline-model-data` builds with that snapshot instead of refreshing it from live provider catalogs. The script still installs dependencies, builds the monorepo, compiles the Bun executable, and stages its runtime assets. Package maintainers who provide dependencies separately can pass `--skip-install --skip-deps`.
+A reusable prompt at `.pi/prompts/skill-creation.md` is available for guided skill authoring. The shared review contract used by the review-related skills lives in [`docs/upstream-review-contract.md`](docs/upstream-review-contract.md).
 
-## Supply-chain hardening
+## Project initialization
 
-We treat npm dependency changes as reviewed code changes.
+The `/sdd-init` slash command (extension at `.pi/extensions/sdd-init.ts`) scaffolds the SDD/OpenSpec layout that the `arc-orchestrator` and review skills expect. Run it inside the project you want to initialize and it will create `.arc/`, `.arc/agents/`, `.arc/chains/`, `.arc/support/`, and `.arc/migrations/` from the bundled templates in `.pi/extensions/arc-agents/`. Run it again on an already-initialized project and it will detect the existing layout and offer to migrate or refresh. No external binaries required.
 
-- Direct external dependencies are pinned to exact versions. Internal workspace packages remain version-ranged.
-- `.npmrc` sets `save-exact=true` and `min-release-age=2` to avoid same-day dependency releases during npm resolution.
-- `package-lock.json` is the dependency ground truth. Pre-commit blocks accidental lockfile commits unless `PI_ALLOW_LOCKFILE_CHANGE=1` is set.
-- `npm run check` verifies pinned direct deps, native TypeScript import compatibility, and the generated coding-agent shrinkwrap.
-- The published CLI package includes `packages/coding-agent/npm-shrinkwrap.json`, generated from the root lockfile, to pin transitive deps for npm users.
-- Release smoke tests use `npm run release:local` to build, pack, and create isolated npm and Bun installs outside the repo before tagging a release.
-- Local release installs, documented npm installs, and `pi update --self` use `--ignore-scripts` where supported.
-- CI installs with `npm ci --ignore-scripts`, and a scheduled GitHub workflow runs `npm audit --omit=dev` plus `npm audit signatures --omit=dev`.
-- Shrinkwrap generation has an explicit allowlist for dependency lifecycle scripts; new lifecycle-script deps fail checks until reviewed.
+## Building standalone binaries
 
-## Share your OSS coding agent sessions
+The release pipeline produces a standalone Bun-based executable and the npm package from a single source archive. Use `npm run release:local -- --out <dir>` to produce a non-published local build, or trigger `.github/workflows/build-binaries.yml` by pushing a `v*` tag.
 
-If you use Pi or other coding agents for open source work, please share your sessions.
+## Permissions & Containerization
 
-Public OSS session data helps improve coding agents with real-world tasks, tool use, failures, and fixes instead of toy benchmarks.
+Arc Agent does not include a built-in permission system for restricting filesystem, process, network, or credential access. By default, it runs with the permissions of the user and process that launched it. If you need stronger boundaries, containerize or sandbox the process. See [packages/coding-agent/docs/containerization.md](packages/coding-agent/docs/containerization.md) for three patterns (Gondolin, plain Docker, OpenShell).
 
-For the full explanation, see [this post on X](https://x.com/badlogicgames/status/2037811643774652911).
+## Contributing
 
-To publish sessions, use [`badlogic/pi-share-hf`](https://github.com/badlogic/pi-share-hf). Read its README.md for setup instructions. All you need is a Hugging Face account, the Hugging Face CLI, and `pi-share-hf`.
+Issues and pull requests are welcome. Before opening a pull request, run `npm run check` and make sure the test suite passes with `./test.sh`.
 
-You can also watch [this video](https://x.com/badlogicgames/status/2041151967695634619), where I show how I publish my `pi-mono` sessions.
+## Maintainer
 
-I regularly publish my own `pi-mono` work sessions here:
-
-- [badlogicgames/pi-mono on Hugging Face](https://huggingface.co/datasets/badlogicgames/pi-mono)
+* [@TecTroncoso](https://github.com/TecTroncoso)
 
 ## License
 
-MIT
-
-<p align="center">
-  <a href="https://pi.dev">pi.dev</a> domain graciously donated by
-  <br /><br />
-  <a href="https://exe.dev"><img src="packages/coding-agent/docs/images/exy.png" alt="Exy mascot" width="48" /><br />exe.dev</a>
-</p>
+MIT. See [LICENSE](LICENSE) for the full text. Arc Agent is a fork of [earendil-works/pi](https://github.com/earendil-works/pi); the original copyright is preserved in the license file.
