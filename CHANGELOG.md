@@ -10,6 +10,16 @@ For per-package changes inherited from upstream pi, see
 `packages/*/CHANGELOG.md`. The entries below cover only the changes
 that distinguish this fork from upstream.
 
+## [0.85.0-arc.1] - 2026-08-28
+
+### Changed
+
+- **Version bump from 0.84.4-arc.1 to 0.85.0-arc.1.** The version is
+  bumped to clear a false-positive "Update Available" banner raised by
+  the upstream SemVer comparison (see the `0.85.0-arc.1` entry in
+  `packages/coding-agent/CHANGELOG.md` for the full rationale). No code
+  change; the runtime is still on top of upstream v0.84.4.
+
 ## [0.84.4-arc.1] - 2026-08-28
 
 First Arc Agent release on top of upstream pi v0.84.4. The base was

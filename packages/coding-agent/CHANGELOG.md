@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.85.0-arc.1] - 2026-08-28
+
+### Changed
+
+- **Version bump from 0.84.4-arc.1 to 0.85.0-arc.1.** No code change. The previous suffix `-arc.1` is a SemVer pre-release, which `semver.compare` orders as **older than** the upstream final `0.84.4`, so the upstream update check (which runs on every TUI startup and uses the upstream-npm registry as the comparison baseline) raised a false-positive "Update Available" banner. Bumping the minor to 0.85.0 puts the version **strictly greater than** upstream `0.84.4` in SemVer order, which clears the banner without touching runtime. The base is still upstream v0.84.4; the minor bump is only there to satisfy SemVer precedence for a fork that ships a pre-release identifier on top of an already-released upstream base.
+
+## [0.84.4-arc.1] - 2026-08-28
+
 ### Changed
 
 - **Base upgraded from upstream v0.84.3 to v0.84.4.** The fork's customizations were re-applied on top of upstream v0.84.4 (commit `b79e4cc`) without any conflict against the extension API surface (the only additive change between releases is `ccfe79e` ui_prompt_start / ui_prompt_end extension events, which this codebase does not use). The previous Arc Agent version, 0.84.3, is preserved as the tag `backup/pre-0.84.4-mcp`.
