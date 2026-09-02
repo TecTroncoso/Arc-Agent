@@ -128,8 +128,6 @@ function registerMcpCommands(pi: McpCommandsAPI): void {
     });
 }
 
-export default function mcpCommandsExtension(pi: McpCommandsAPI): void {
-    registerMcpCommands(pi);
-}
+export default registerMcpCommands;
 
 
