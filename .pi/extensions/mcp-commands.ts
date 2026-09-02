@@ -33,6 +33,20 @@ interface McpCommandsAPI {
 async function promptName(ui: CommandUI, args: string, label: string): Promise<string> {
     return (args.trim() || await ui.input(label, "")).trim();
 }
+
+function parseEnvLine(line: string): Record<string, string> {
+    const out: Record<string, string> = {};
+    if (!line.trim()) return out;
+    for (const pair of line.split(",")) {
+        const idx = pair.indexOf("=");
+        if (idx > 0) {
+            const key = pair.slice(0, idx).trim();
+            const value = pair.slice(idx + 1).trim();
+            if (key) out[key] = value;
+        }
+    }
+    return out;
+}
 function registerMcpCommands(pi: McpCommandsAPI): void {
     const path = mcpJsonPath();
 
@@ -80,13 +94,7 @@ function registerMcpCommands(pi: McpCommandsAPI): void {
             const argsLine = await ui.input(`Args for "${name}" (space-separated, empty for none):`, "");
             const argsList = argsLine.trim() ? argsLine.trim().split(/\s+/) : [];
             const envLine = await ui.input(`Env vars (KEY=VALUE, comma-separated, optional):`, "");
-            const env: Record<string, string> = {};
-            if (envLine.trim()) {
-                for (const pair of envLine.split(",")) {
-                    const idx = pair.indexOf("=");
-                    if (idx > 0) env[pair.slice(0, idx).trim()] = pair.slice(idx + 1).trim();
-                }
-            }
+            const env = parseEnvLine(envLine);
             if (!cfg.mcpServers) cfg.mcpServers = {};
             cfg.mcpServers[name] = { command, args: argsList, env, type: "stdio" };
             saveMcpJson(path, cfg);
