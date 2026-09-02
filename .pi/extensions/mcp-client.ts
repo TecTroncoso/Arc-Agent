@@ -25,9 +25,9 @@
  */
 
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { Type } from "typebox";
 
 const MCP_PROTOCOL_VERSION = "2024-11-05";
@@ -270,13 +270,13 @@ class McpStdioClient {
 	}
 }
 
-function mcpJsonPath(): string {
+export function mcpJsonPath(): string {
 	const override = process.env.PI_CODING_AGENT_DIR?.trim();
 	const base = override || join(homedir(), ".pi", "agent");
 	return join(base, "mcp.json");
 }
 
-function loadMcpJson(path: string): McpJson {
+export function loadMcpJson(path: string): McpJson {
 	if (!existsSync(path)) return {};
 	try {
 		return JSON.parse(readFileSync(path, "utf8")) as McpJson;
@@ -285,6 +285,11 @@ function loadMcpJson(path: string): McpJson {
 		console.warn(`[mcp] cannot parse ${path}: ${message}`);
 		return {};
 	}
+}
+
+export function saveMcpJson(path: string, data: McpJson): void {
+	mkdirSync(dirname(path), { recursive: true });
+	writeFileSync(path, JSON.stringify(data, null, 2) + "\n", "utf8");
 }
 
 /**
