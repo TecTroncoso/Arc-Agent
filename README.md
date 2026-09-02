@@ -21,7 +21,7 @@ Arc Agent is an interactive coding agent CLI for the terminal. It is a fork of t
 
 > **Branch / version status**
 >
-> * `feat/mcp-client` runs Arc Agent **0.84.4-arc.1** on top of upstream pi v0.84.4. This is the active development branch.
+> * `feat/arc-0.84.4-arc.1` runs Arc Agent **0.85.0-arc.1** on top of upstream pi v0.84.4. This is the active development branch.
 > * `main` and `feat/gentle-pi-options` are still on Arc Agent 0.84.3 (upstream pi v0.84.3). The pre-upgrade state of every branch is preserved as a `backup/pre-0.84.4-*` tag if you need to roll back.
 
 ## Packages
@@ -135,6 +135,27 @@ A reusable prompt at `.pi/prompts/skill-creation.md` is available for guided ski
 ## Project initialization
 
 The `/sdd-init` slash command (extension at `.pi/extensions/sdd-init.ts`) scaffolds the SDD/OpenSpec layout that the `arc-orchestrator` and review skills expect. Run it inside the project you want to initialize and it will create `.arc/`, `.arc/agents/`, `.arc/chains/`, `.arc/support/`, and `.arc/migrations/` from the bundled templates in `.pi/extensions/arc-agents/`. Run it again on an already-initialized project and it will detect the existing layout and offer to migrate or refresh. No external binaries required.
+
+## Upgrading from upstream pi
+
+Arc Agent is a fork of [earendil-works/pi](https://github.com/earendil-works/pi) and tracks upstream releases as they come out. The upgrade flow is one command:
+
+```bash
+git fetch upstream tag vX.Y.Z
+git checkout -b feat/arc-vX.Y.Z-arc.1
+scripts/upgrade-from-upstream.sh vX.Y.Z
+```
+
+The `upgrade-from-upstream.sh` script does the following:
+
+1. Saves the current HEAD as the rollback anchor.
+2. Resets the branch to the requested upstream tag (clean copy of upstream).
+3. Re-checks out every Arc customization from `scripts/arc-customizations.manifest` (a flat list of repo-relative paths).
+4. Bumps `packages/coding-agent/package.json` to `<upstream>-arc.1`.
+5. Appends a `[Unreleased]` entry to the package CHANGELOG.
+6. Prints `git status` for review. The next step is typecheck, test, commit, push.
+
+The full procedure, including rollback, the `<upstream>-arc.N` versioning rationale, and how to update the manifest when adding new Arc customizations, is documented in [`docs/upstream-upgrade.md`](docs/upstream-upgrade.md).
 
 ## Building standalone binaries
 
