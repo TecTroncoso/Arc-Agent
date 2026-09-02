@@ -83,6 +83,16 @@ What is not implemented yet:
 
 If a server entry uses `http`/`sse`, the extension logs a warning and skips it. Servers that start successfully are added to the tool registry; a slow startup (more than 10s) is also treated as a failure and skipped.
 
+### Managing servers interactively
+
+A companion extension at `.pi/extensions/mcp-commands.ts` exposes three slash commands for managing `~/.pi/agent/mcp.json` from the TUI without leaving the session. After running any of these, restart the session so the new configuration is loaded by the MCP client.
+
+* `/mcp-list` — show all configured servers with their transport and target command or URL.
+* `/mcp-add <name>` — interactively define a new server. Prompts for command, args, and `KEY=VALUE` env vars. If `<name>` is omitted you are asked for it. Existing names trigger an overwrite confirmation.
+* `/mcp-remove <name>` — delete a server entry from `mcp.json`. Confirms before deleting.
+
+Env vars are passed as a single comma-separated line (`KEY=value,KEY2=value2`). The same `mcp.json` file is read and written by all three commands and by the client extension, so values stay consistent across both.
+
 ## Profiles
 
 The repository ships an extension in `.pi/extensions/profile-switcher.ts` that exposes the `/profile` slash command. Profiles bundle a persona, thinking level, and `enabledModels` filter into named presets stored in `~/.pi/agent/profiles/<name>.json`. The first time `/profile` runs, it seeds three built-in profiles:
